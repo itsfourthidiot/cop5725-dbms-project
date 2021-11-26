@@ -1,18 +1,21 @@
 var createError = require('http-errors');
 var express = require('express');
+var cors = require('cors');
 var bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var todosRouter = require('./routes/todos');
+var utilsRouter = require('./routes/utils');
+var vaccinationRouter = require('./routes/vaccination');
 
 // Swagger UI
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
 var app = express();
+app.use(cors());
 
 // Request body parser
 app.use(bodyParser.json());
@@ -29,7 +32,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/todos', todosRouter);
+app.use('/api', utilsRouter);
+app.use('/api/vaccination', vaccinationRouter);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
