@@ -11,6 +11,7 @@ var utilsRouter = require('./routes/utils');
 var vaccinationRouter = require('./routes/vaccination');
 var vaccinationWorldRouter = require('./routes/vaccination-world');
 var mortalityRateRouter = require('./routes/mortality-rate');
+var communityRouter = require('./routes/community');
 
 // Swagger UI
 const swaggerUi = require('swagger-ui-express');
@@ -38,6 +39,7 @@ app.use('/api', utilsRouter);
 app.use('/api/vaccination', vaccinationRouter);
 app.use('/api/vaccination-world', vaccinationWorldRouter);
 app.use('/api/mortality-rate', mortalityRateRouter);
+app.use('/api/community', communityRouter);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

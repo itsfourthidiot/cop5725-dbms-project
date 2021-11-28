@@ -17,4 +17,8 @@ router.get('/mortality-rate', function(req, res, next) {
   res.render('mortality-rate', { title: 'Mortality Rate Page' });
 });
 
+router.get('/community', function(req, res, next) {
+  res.render('community', { title: 'Community Page' });
+});
+
 module.exports = router;
