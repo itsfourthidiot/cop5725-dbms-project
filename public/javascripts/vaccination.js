@@ -163,8 +163,6 @@ function drawDefaultUsVaccinationTrendChart() {
   let fromDate = $('#from-date').val();
   let toDate = $('#to-date').val();
   let id = $("#us-states").val();
-  console.log(fromDate, toDate, id);
-  console.log(fromDate, toDate, id);
   d3.json(usVaccinationTrendApi, {
     method: "POST",
     headers: {

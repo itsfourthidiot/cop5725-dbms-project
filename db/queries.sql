@@ -117,11 +117,11 @@ WITH Filtered(id, record_date, daily_positive_cases, daily_deaths, county_id) AS
         daily_positive_cases,
         daily_deaths,
         county_id
-    FROM County_covid_data
+    FROM "N.SAOJI".County_covid_data
     WHERE
          county_id IN
         (
-            SELECT id FROM County
+            SELECT id FROM "N.SAOJI".County
             WHERE state_id IN (1)
         )
 )
@@ -134,8 +134,8 @@ FROM
     SELECT
         rs.record_date,
         rs.county_id,
-        County.state_id,
-        ROUND(((rs.sum_daily_positive_cases * County.population) / 100000), 2) AS transmission_risk
+        c.state_id,
+        ROUND(((rs.sum_daily_positive_cases * c.population) / 100000), 2) AS transmission_risk
     FROM
     (
         SELECT
@@ -151,8 +151,8 @@ FROM
             f1.county_id
         FROM Filtered f1
     ) rs
-    INNER JOIN County
-    ON rs.county_id = County.id
+    INNER JOIN "N.SAOJI".County c
+    ON rs.county_id = c.id
 )
 WHERE
     transmission_risk >= 100 AND

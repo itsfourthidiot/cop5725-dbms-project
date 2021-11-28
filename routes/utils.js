@@ -14,10 +14,10 @@ async function getUsStates(req, res) {
   let connection, result;
   try {
     let sql = `
-      SELECT State.id, State.name FROM State
-      INNER JOIN Country
-      ON State.country_id=Country.id
-      WHERE "N.SAOJI".Country.name='United States'
+      SELECT s.id, s.name FROM "N.SAOJI".State s
+      INNER JOIN "N.SAOJI".Country c
+      ON s.country_id=c.id
+      WHERE c.name='United States'
     `;
     connection = await oracledb.getConnection(config);
     result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
