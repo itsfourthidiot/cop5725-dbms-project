@@ -232,3 +232,26 @@ FROM
 ) t1 INNER JOIN Country
 ON t1.country_id = Country.id
 WHERE (record_date BETWEEN '01-Jan-2020' AND '01-Jan-2022');
+
+--Bed VS Death Comparision
+SELECT fsid AS "State ID", fsn AS "State Name", tab AS "Total Beds", cbo AS "Covid ICU Bed Occupancy", tpc AS "Total Positive Cases", td AS "Total Deaths", dt AS "Date"
+FROM 
+(
+    WITH bedinfo (sid, rd, tb, coib) AS
+    (
+        SELECT hd.STATE_ID, hd.RECORD_DATE, SUM(hd.TOTAL_BEDS), SUM(hd.COVID_OCCUPIED_ICU_BEDS) FROM "N.SAOJI".HOSPITALIZATION_DATA hd, "N.SAOJI".STATE s 
+        WHERE hd.STATE_ID = s.ID
+        GROUP BY hd.STATE_ID, hd.RECORD_DATE
+    ),
+    deathinfo (sid2, rd2, dpc, dd) AS
+    (
+        SELECT s.ID, ccd.RECORD_DATE, SUM(ccd.DAILY_POSITIVE_CASES), SUM(ccd.DAILY_DEATHS) FROM "N.SAOJI".STATE s, "N.SAOJI".COUNTY c , "N.SAOJI".COUNTY_COVID_DATA ccd 
+        WHERE s.ID = c.STATE_ID AND c.ID = ccd.COUNTY_ID
+        GROUP BY s.ID , ccd.RECORD_DATE 
+    )
+    SELECT s2.ID AS fsid, s2.NAME AS fsn, bi.tb AS tab, bi.coib AS cbo, di.dpc AS tpc, di.dd AS td, bi.rd AS dt
+    FROM "N.SAOJI".STATE s2, bedinfo bi, deathinfo di
+    WHERE s2.ID = bi.sid AND bi.sid = di.sid2 AND bi.rd = di.rd2
+)
+WHERE dt BETWEEN '15-MAR-21' AND '22-MAR-21' AND fsn IN ('California', 'Florida')
+ORDER BY fsn ASC, dt ASC;
