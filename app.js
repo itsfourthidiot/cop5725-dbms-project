@@ -9,7 +9,13 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var utilsRouter = require('./routes/utils');
 var vaccinationRouter = require('./routes/vaccination');
+<<<<<<< HEAD
 var hospitalizationRouter = require('./routes/hospitalization');
+=======
+var vaccinationWorldRouter = require('./routes/vaccination-world');
+var mortalityRateRouter = require('./routes/mortality-rate');
+var communityRouter = require('./routes/community');
+>>>>>>> 129172eb4bf19f2e3b4e4924c8ad9c8851244d73
 
 // Swagger UI
 const swaggerUi = require('swagger-ui-express');
@@ -35,7 +41,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api', utilsRouter);
 app.use('/api/vaccination', vaccinationRouter);
+<<<<<<< HEAD
 app.use('/api/hospitalization', hospitalizationRouter);
+=======
+app.use('/api/vaccination-world', vaccinationWorldRouter);
+app.use('/api/mortality-rate', mortalityRateRouter);
+app.use('/api/community', communityRouter);
+>>>>>>> 129172eb4bf19f2e3b4e4924c8ad9c8851244d73
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

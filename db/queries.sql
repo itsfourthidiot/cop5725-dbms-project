@@ -82,7 +82,7 @@ WITH Filtered(record_date, country_daily_positive_cases, country_daily_deaths, c
         daily_positive_cases AS country_daily_positive_cases,
         daily_deaths AS country_daily_deaths,
         country_id
-    FROM Country_covid_data
+    FROM "N.SAOJI".Country_covid_data
     WHERE country_id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 )
 SELECT
@@ -211,7 +211,7 @@ WITH Filtered(record_date, daily_vaccinations, country_id) AS
         record_date,
         daily_vaccinations,
         country_id
-    FROM Country_covid_data
+    FROM "N.SAOJI".Country_covid_data
     WHERE country_id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 )
 SELECT
@@ -219,8 +219,8 @@ SELECT
     cumulative_vaccinations,
     ((cumulative_vaccinations / population) * 100) AS cumulative_vaccinations_percentage,
     population,
-    Country.id AS country_id,
-    Country.name AS country_name
+    c.id AS country_id,
+    c.name AS country_name
 FROM
 (
     SELECT
@@ -229,8 +229,8 @@ FROM
         NVL(SUM(daily_vaccinations) OVER(PARTITION BY country_id ORDER BY record_date), 0) AS cumulative_vaccinations,
         country_id
     FROM Filtered
-) t1 INNER JOIN Country
-ON t1.country_id = Country.id
+) t1 INNER JOIN "N.SAOJI".Country c
+ON t1.country_id = c.id
 WHERE (record_date BETWEEN '01-Jan-2020' AND '01-Jan-2022');
 
 --Bed VS Death Comparision
