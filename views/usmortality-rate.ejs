@@ -1,0 +1,53 @@
+<%- include("partials/head") %>
+<%- include("partials/navbar") %>
+<div class="container">
+  <!-- Option to choose between US and world -->
+  <div id="us-mortality">
+    <form>
+      <div class="row">
+        <!-- State dropdown -->
+        <div class="col-md-4">
+          <label class="form-label" for="us-states">Select state(s)</label>
+          <select id="us-states" class="form-control selectpicker" multiple>
+            <!-- Fill the options using values stored in db -->
+          </select>
+        </div>
+        <!-- From date -->
+        <div class="col-md-4">
+          <label class="form-label" for="from-date">From date</label>
+          <div class="input-group date" data-provide="datepicker" data-date-format="dd-M-yyyy">
+            <input class="form-control" id="from-date" name="from-date" placeholder="dd-M-yyyy" value="01-Jan-2020" type="text"/>  
+            <div class="input-group-addon">
+                <span class="glyphicon glyphicon-th"></span>
+            </div>
+          </div>
+        </div>
+        <!-- To date -->
+        <div class="col-md-4">
+          <label class="form-label" for="to-date">To date</label>
+          <div class="input-group date" data-provide="datepicker" data-date-format="dd-M-yyyy">
+            <input class="form-control" id="to-date" name="to-date" placeholder="dd-M-yyyy" value="01-Jan-2022" type="text"/>  
+            <div class="input-group-addon">
+                <span class="glyphicon glyphicon-th"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Submit button -->
+      <div class="row justify-content-md-center">
+        <div class="col-md-3">
+          <button class="btn btn-primary" name="submit" type="submit">Submit</button>
+        </div>
+      </div>
+    </form>
+    <svg
+      id="us-mortality-trend"
+      version="1.1"
+      baseProfile="full"
+      xmlns="http://www.w3.org/2000/svg" >
+    </svg>
+  </div>
+</div>
+<!-- JavaScript -->
+<script src='/javascripts/usmortality.js'></script>
+<%- include("partials/footer") %>
