@@ -9,6 +9,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var utilsRouter = require('./routes/utils');
 var vaccinationRouter = require('./routes/vaccination');
+var communityRouter = require('./routes/community');
 
 // Swagger UI
 const swaggerUi = require('swagger-ui-express');
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api', utilsRouter);
 app.use('/api/vaccination', vaccinationRouter);
+app.use('/api/community', communityRouter);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
