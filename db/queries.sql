@@ -255,3 +255,85 @@ FROM
 )
 WHERE dt BETWEEN '15-MAR-21' AND '22-MAR-21' AND fsn IN ('California', 'Florida')
 ORDER BY fsn ASC, dt ASC;
+
+--Overall Record Count of the DB
+SELECT t1.cryc+t2.ccdcryc+t3.couc+t4.ccdcouc+t5.hc+t7.vc+t6.sc AS TotalCount FROM 
+    (SELECT COUNT(*) AS cryc FROM "N.SAOJI".COUNTRY c) t1, 
+    (SELECT COUNT(*) AS ccdcryc FROM "N.SAOJI".COUNTRY_COVID_DATA ccd) t2,
+    (SELECT COUNT(*) AS couc FROM "N.SAOJI".COUNTY c2) t3,
+    (SELECT COUNT(*) AS ccdcouc FROM "N.SAOJI".COUNTY_COVID_DATA ccd2) t4,
+    (SELECT COUNT(*) AS hc FROM "N.SAOJI".HOSPITALIZATION_DATA hd) t5,
+    (SELECT COUNT(*) AS sc FROM "N.SAOJI".STATE s) t6,
+    (SELECT COUNT(*) AS vc FROM "N.SAOJI".VACCINATION_DATA vd) t7;
+
+--Total positive Cases and deaths their percentage per million for US
+SELECT ftpc AS "Total Positive Cases", (ftpc/ftp)*1000000 AS "Percentage of Positive Cases per million people", ftd AS "Total Deaths", (ftd/ftp)*1000000 AS "Percentage of deaths per million people"
+FROM 
+(
+    SELECT SUM(ts) AS ftpc, SUM(td) AS ftd, SUM(tp) AS ftp FROM 
+    (
+        SELECT s.ID, SUM(ccd.DAILY_POSITIVE_CASES) AS ts, SUM(ccd.DAILY_DEATHS) AS td, SUM(c.POPULATION) AS tp
+        FROM "N.SAOJI".COUNTY_COVID_DATA ccd, "N.SAOJI".COUNTY c, "N.SAOJI".STATE s 
+        WHERE ccd.COUNTY_ID = c.ID AND c.STATE_ID = s.ID 
+        GROUP BY s.ID
+    )
+)
+
+--Total positive Cases and deaths their percentage per million for the World
+SELECT ftpc AS "Total Positive Cases", (ftpc/ftp)*1000000 AS "Percentage of Positive Cases per million people", ftd AS "Total Deaths", (ftd/ftp)*1000000 AS "Percentage of deaths per million people"
+FROM 
+(
+    SELECT SUM(ts) AS ftpc, SUM(td) AS ftd, SUM(tp) AS ftp FROM 
+    (
+        SELECT c2.ID, SUM(ccd.DAILY_POSITIVE_CASES) AS ts, SUM(ccd.DAILY_DEATHS) AS td, SUM(c2.POPULATION) AS tp
+        FROM "N.SAOJI".COUNTRY c2 , "N.SAOJI".COUNTRY_COVID_DATA ccd 
+        WHERE c2.ID = ccd.COUNTRY_ID 
+        GROUP BY c2.ID
+    )
+)
+
+--Total Vaccinations in the world
+SELECT ftv AS "Total Vaccinations", (ftv/ftp)*1000 AS "Percentage of Vaccinations per thousand people"
+FROM 
+(
+    SELECT SUM(tv) AS ftv, SUM(tp) AS ftp FROM 
+    (
+        SELECT c2.ID, SUM(ccd.DAILY_VACCINATIONS) AS tv, SUM(c2.POPULATION) AS tp
+        FROM "N.SAOJI".COUNTRY c2 , "N.SAOJI".COUNTRY_COVID_DATA ccd 
+        WHERE c2.ID = ccd.COUNTRY_ID 
+        GROUP BY c2.ID
+    )
+)
+
+--Total Vaccinations in the US
+SELECT fdfd AS "Total First Doses", (fdfd/ftp)*1000 AS "Percentage of first dose Vaccinations per thousand",
+fdfc AS "Total fully vaccinated", (fdfc/ftp)*1000 AS "Percentage of complete Vaccinations per thousand",
+f12 AS "12+ group Vaccinations", (f12/ftp)*1000 AS "Percentage of 12+ age group Vaccinations per thousand",
+f18 AS "18+ group Vaccinations", (f18/ftp)*1000 AS "Percentage of 18+ age group Vaccinations per thousand",
+f65 AS "65+ group Vaccinations", (f65/ftp)*1000 AS "Percentage of 65+ age group Vaccinations per thousand" 
+FROM 
+(
+    SELECT SUM(dfd) AS fdfd, SUM(dfc) AS fdfc, SUM(dfc12) AS f12, SUM(dfc18) AS f18, SUM(dfc65) AS f65, SUM(tp) AS ftp FROM 
+    (
+        SELECT s.ID, SUM(vd.DAILY_FIRST_DOSES) AS dfd, SUM(vd.DAILY_FULLY_VACCINATED) AS dfc, SUM(vd.DAILY_FULLY_VACCINATED_12PLUS) AS dfc12, 
+        SUM(vd.DAILY_FULLY_VACCINATED_18PLUS) AS dfc18, SUM(vd.DAILY_FULLY_VACCINATED_65PLUS) AS dfc65, SUM(c.POPULATION) AS tp
+        FROM "N.SAOJI".STATE s , "N.SAOJI".VACCINATION_DATA vd, "N.SAOJI".COUNTY c 
+        WHERE s.ID = vd.STATE_ID AND s.ID = c.STATE_ID 
+        GROUP BY s.ID
+    )
+)
+
+--Total Hospitilization in the US
+SELECT ftb AS "Total Number of Beds", (ftb/ftp)*1000 AS "Percentage of beds per thousand",
+fib AS "Total Covid Beds", (fib/ftp)*1000 AS "Percentage of covid beds per thousand",
+fcb AS "Total Covid ICU Beds", (fcb/ftp)*1000 AS "Percentage of covid icu beds per thousand" 
+FROM 
+(
+    SELECT SUM(tb) AS ftb, SUM(ticb) AS fib, SUM(tcicb) AS fcb, SUM(tp) AS ftp FROM 
+    (
+        SELECT s.ID, SUM(hd.TOTAL_BEDS) AS tb, SUM(hd.ICU_BEDS) AS ticb, SUM(hd.COVID_OCCUPIED_ICU_BEDS) AS tcicb, SUM(c.POPULATION) AS tp
+        FROM "N.SAOJI".STATE s , "N.SAOJI".HOSPITALIZATION_DATA hd , "N.SAOJI".COUNTY c 
+        WHERE s.ID = hd.STATE_ID AND s.ID = c.STATE_ID 
+        GROUP BY s.ID
+    )
+)
