@@ -44,6 +44,7 @@ fetch(usStatesApi)
 
 // US Mortality trend API
 const usMortalityTrendApi = "http://localhost:3000/api/mortality/us-mortality-trend";
+const usMortalitySummaryApi = "http://localhost:3000/api/mortality/us-mortality-summary";
 
 // SVG configurations
 const margin = {
@@ -197,5 +198,15 @@ $("form").submit(function(e){
     })
   })
   .then(drawUsMortalityTrendChart)
+  .catch(displayErrors);
+  d3.json(usMortalitySummaryApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
   .catch(displayErrors);
 });

@@ -44,6 +44,7 @@ fetch(usStatesApi)
 
 // US vaccination trend API
 const CommunityTrendApi = "http://localhost:3000/api/community/community-trend";
+const CommunitySummaryApi = "http://localhost:3000/api/community/community-summary";
 
 // SVG configurations
 const margin = {
@@ -197,5 +198,15 @@ $("form").submit(function(e){
     })
   })
   .then(drawCommunityTrendChart)
+  .catch(displayErrors);
+  d3.json(CommunitySummaryApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
   .catch(displayErrors);
 });

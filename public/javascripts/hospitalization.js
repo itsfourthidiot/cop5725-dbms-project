@@ -44,6 +44,7 @@ fetch(usStatesApi)
 
 // US hospitalization trend API
 const usHospitalizationTrendApi = "http://localhost:3000/api/hospitalization/us-hospitalization-trend";
+const usHospitalizationSummaryApi = "http://localhost:3000/api/hospitalization/us-hospitalization-summary";
 
 // SVG configurations
 const margin = {
@@ -197,5 +198,15 @@ $("form").submit(function(e){
     })
   })
   .then(drawUsHospitalizatioTrendChart)
+  .catch(displayErrors);
+  d3.json(usHospitalizationSummaryApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
   .catch(displayErrors);
 });

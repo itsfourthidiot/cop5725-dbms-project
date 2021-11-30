@@ -44,6 +44,7 @@ fetch(worldCountriesApi)
 
 // US vaccination trend API
 const worldVaccinationTrendApi = "http://localhost:3000/api/vaccination-world/world-vaccination-trend";
+const worldVaccinationSummaryApi = "http://localhost:3000/api/vaccination-world/world-vaccination-summary";
 
 // SVG configurations
 const margin = {
@@ -198,5 +199,15 @@ $("form").submit(function(e){
     })
   })
   .then(drawWorldVaccinationTrendChart)
+  .catch(displayErrors);
+  d3.json(worldVaccinationSummaryApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
   .catch(displayErrors);
 });

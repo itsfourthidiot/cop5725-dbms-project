@@ -44,6 +44,7 @@ fetch(worldCountriesApi)
 
 // US vaccination trend API
 const worldMortalityRateTrendApi = "http://localhost:3000/api/mortality-rate/world-mortality-rate-trend";
+const worldMortalityRateSummaryApi = "http://localhost:3000/api/mortality-rate/world-mortality-rate-summary";
 
 // SVG configurations
 const margin = {
@@ -198,5 +199,15 @@ $("form").submit(function(e){
     })
   })
   .then(drawWorldMortalityRateTrendChart)
+  .catch(displayErrors);
+  d3.json(worldMortalityRateSummaryApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
   .catch(displayErrors);
 });

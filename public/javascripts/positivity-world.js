@@ -44,6 +44,7 @@ fetch(worldCountriesApi)
 
 // World positivity trend API
 const worldPositivityTrendApi = "http://localhost:3000/api/positivity-world/world-positivity-trend";
+const worldPositivitySummaryApi = "http://localhost:3000/api/positivity-world/world-positivity-summary";
 
 // SVG configurations
 const margin = {
@@ -198,5 +199,15 @@ $("form").submit(function(e){
     })
   })
   .then(drawWorldPositivityTrendChart)
+  .catch(displayErrors);
+  d3.json(worldPositivitySummaryApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      id: id
+    })
+  })
   .catch(displayErrors);
 });
