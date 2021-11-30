@@ -69,9 +69,50 @@ async function worldMortalityRate (req, res) {
   }
 };
 
+async function worldMortalityRateSummary (req, res) {
+  let connection, result;
+  try {
+    // Parse user input
+    let fromDate = req.body.fromDate;
+    let toDate = req.body.toDate;
+    let id = req.body.id;
+    // Construct SQL statement
+    let sql = `SELECT ftd AS "Total Deaths", (ftd/ftp)*1000000 AS "Percentage of deaths per million people"
+    FROM 
+    (
+        SELECT SUM(ts) AS ftpc, SUM(td) AS ftd, SUM(tp) AS ftp FROM 
+        (
+            SELECT c2.ID, SUM(ccd.DAILY_POSITIVE_CASES) AS ts, SUM(ccd.DAILY_DEATHS) AS td, SUM(c2.POPULATION) AS tp
+            FROM "N.SAOJI".COUNTRY c2 , "N.SAOJI".COUNTRY_COVID_DATA ccd 
+            WHERE c2.ID = ccd.COUNTRY_ID 
+            GROUP BY c2.ID
+        )
+    )
+    `
+    // Creat db connection
+    connection = await oracledb.getConnection(config);
+    result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+  } catch (err) {
+    // Display error message
+    console.log('[Error] ', err);
+    return res.json(err)
+  } finally {
+    // Display results
+    if(connection) {
+      await connection.close();
+      return res.json(result.rows);
+    }
+  }
+};
+
 router.post('/world-mortality-rate-trend', function (req, res) {
   console.log("[INFO] POST /api/mortality-rate/world-mortality-rate-trend route...");
   worldMortalityRate(req, res);
+})
+
+router.post('/world-mortality-rate-summary', function (req, res) {
+  console.log("[INFO] POST /api/mortality-rate/world-mortality-rate-summary route...");
+  worldMortalityRateSummary(req, res);
 })
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -58,9 +58,48 @@ ON f.country_id = c.id;`
   }
 };
 
+async function worldPositivitySummary (req, res) {
+  let connection, result;
+  try {
+    // Parse user input
+    let id = req.body.id;
+    // Construct SQL statement
+    let sql = `SELECT ftpc AS "Total Positive Cases", (ftpc/ftp)*1000000 AS "Percentage of Positive Cases per million people"
+    FROM 
+    (
+        SELECT SUM(ts) AS ftpc, SUM(td) AS ftd, SUM(tp) AS ftp FROM 
+        (
+            SELECT c2.ID, SUM(ccd.DAILY_POSITIVE_CASES) AS ts, SUM(ccd.DAILY_DEATHS) AS td, SUM(c2.POPULATION) AS tp
+            FROM "N.SAOJI".COUNTRY c2 , "N.SAOJI".COUNTRY_COVID_DATA ccd 
+            WHERE c2.ID = ccd.COUNTRY_ID 
+            GROUP BY c2.ID
+        )
+    )
+    `
+    // Creat db connection
+    connection = await oracledb.getConnection(config);
+    result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+  } catch (err) {
+    // Display error message
+    console.log('[Error] ', err);
+    return res.json(err)
+  } finally {
+    // Display results
+    if(connection) {
+      await connection.close();
+      return res.json(result.rows);
+    }
+  }
+};
+
 router.post('/world-positivity-trend', function (req, res) {
   console.log("[INFO] POST /api/positivity-world/world-positivity-trend route...");
   worldPositivityTrend(req, res);
+})
+
+router.post('/world-positivity-summary', function (req, res) {
+  console.log("[INFO] POST /api/positivity-world/world-positivity-summary route...");
+  worldPositivitySummary(req, res);
 })
 
 ////////////////////////////////////////////////////////////////////////////////
