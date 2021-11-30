@@ -33,9 +33,9 @@ async function usVaccinationTrend (req, res) {
     SELECT
         TO_CHAR(t1.record_date, 'YYYY-MM-DD') AS record_date,
         t1.cumulative_first_doses,
-        ((t1.cumulative_first_doses / t2.state_population) * 100) AS cumulative_first_doses_percentage,
+        ROUND(((t1.cumulative_first_doses / t2.state_population) * 100), 2) AS cumulative_first_doses_percentage,
         t1.cumulative_fully_vaccinated,
-        ((t1.cumulative_fully_vaccinated / t2.state_population) * 100) AS cumulative_fully_vaccinated_percentage,
+        ROUND(((t1.cumulative_fully_vaccinated / t2.state_population) * 100), 2) AS cumulative_fully_vaccinated_percentage,
         t2.state_id,
         t2.state_name
     FROM
