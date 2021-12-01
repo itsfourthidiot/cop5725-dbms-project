@@ -18,6 +18,7 @@ async function usHospitalizationTrend (req, res) {
     let fromDate = req.body.fromDate;
     let toDate = req.body.toDate;
     let id = req.body.id;
+    console.log(fromDate, toDate, id);
     // Construct SQL statement
     let sql = `
     SELECT fsid AS "STATE_ID", fsn AS "State Name", tab AS "Total Beds", cbo AS "COVID_ICU_BED_OCCUPANCY", tpc AS "Total Positive Cases", td AS "Total Deaths", dt AS "RECORD_DATE"
@@ -97,8 +98,8 @@ async function usHospitalizationSummary (req, res) {
   }
 };
 
-router.post('/us-hospitalization-trend', function (req, res) {
-  console.log("[INFO] POST /api/hospitalization/us-hospitalization-trend route...");
+router.post('/hospitalization-trend', function (req, res) {
+  console.log("[INFO] POST /api/hospitalization/hospitalization-trend route...");
   usHospitalizationTrend(req, res);
 })
 

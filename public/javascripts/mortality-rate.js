@@ -324,215 +324,292 @@ $("#us-mortality-rate form").submit(function(e){
   // .catch(displayErrors);
 });
 
-// ////////////////////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////// Populate dropdown for US states
-// ////////////////////////////////////////////////////////////////////////////////
-// // US states API
-// const worldCountriesApi = "http://localhost:3000/api/world-countries"
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////// Populate dropdown for US states
+////////////////////////////////////////////////////////////////////////////////
+// US states API
+const worldCountriesApi = "http://localhost:3000/api/world-countries"
 
-// function parseJSON(response) {
-//   return response.json();
-// }
+function populateWorldCountriesDropdown(data) {
+  for(let i=0; i<data.length; i++) {
+      if(data[i].NAME == "United States") {
+        $("#world-countries").append(
+          `<option value=${data[i].ID} selected>${data[i].NAME}</option>`
+        )
+      } else {
+        $("#world-countries").append(
+          `<option value=${data[i].ID}>${data[i].NAME}</option>`
+        )
+      }
+  }
+  $("#world-countries").selectpicker("refresh");
+}
 
-// function populateDropdown(data) {
-//   for(let i=0; i<data.length; i++) {
-//       if(data[i].NAME == "United States") {
-//         $("#world-countries").append(
-//           `<option value=${data[i].ID} selected>${data[i].NAME}</option>`
-//         )
-//       } else {
-//         $("#world-countries").append(
-//           `<option value=${data[i].ID}>${data[i].NAME}</option>`
-//         )
-//       }
-//   }
-//   $("#world-countries").selectpicker("refresh");
-// }
+fetch(worldCountriesApi)
+.then(parseJSON)
+.then(populateWorldCountriesDropdown)
+.then(drawDefaultWorldDeathRateTrendChart)
+.catch(displayErrors);
 
-// function displayErrors(err){
-//   console.log("INSIDE displayErrors!");
-//   console.log(err);
-// }
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////// World mortality rate trend
+////////////////////////////////////////////////////////////////////////////////
 
-// fetch(worldCountriesApi)
-// .then(parseJSON)
-// .then(populateDropdown)
-// .then(drawDefaultWorldDeathRateTrendChart)
-// .catch(displayErrors);
-
-// ////////////////////////////////////////////////////////////////////////////////
-// ////////////////////////////////////////////////////////////////////////////////
-
-// ////////////////////////////////////////////////////////////////////////////////
-// /////////////////////////////////////////// Query 1:  World mortality rate trend
-// ////////////////////////////////////////////////////////////////////////////////
-
-// // US vaccination trend API
-// const worldMortalityRateTrendApi = "http://localhost:3000/api/mortality-rate/world-mortality-rate-trend";
+// US vaccination trend API
+const worldMortalityRateTrendApi = "http://localhost:3000/api/mortality-rate/world-mortality-rate-trend";
 // const worldMortalityRateSummaryApi = "http://localhost:3000/api/mortality-rate/world-mortality-rate-summary";
 
-// // SVG configurations
-// const margin = {
-//   top: 25,
-//   right: 25,
-//   bottom: 50,
-//   left: 50
-// };
-// const width = 600 - margin.left - margin.right;
-// const height = 400 - margin.top - margin.bottom;
+// append the svg object to the body of the page
+const worldMortalityRateTrendSvg = d3.select("#world-mortality-rate-trend")
+                                    .append("svg")
+                                     .attr("width", width + margin.left + margin.right)
+                                     .attr("height", height + margin.top + margin.bottom)
+                                   .append("g")
+                                     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// // append the svg object to the body of the page
-// const worldMortalityRateTrendSvg = d3.select("#world-mortality-rate-trend")
-//                                      .attr("width", width + margin.left + margin.right)
-//                                      .attr("height", height + margin.top + margin.bottom)
-//                                    .append("g")
-//                                      .attr("transform", `translate(${margin.left},${margin.top})`);
+// Initialize X-axis
+const worldXScale = d3.scaleTime()
+                   .range([0, width]);
+const worldXAxis = d3.axisBottom(worldXScale);
+worldMortalityRateTrendSvg.append("g")
+                       .attr("transform", `translate(0, ${height})`)
+                       .attr("class", "worldXAxis");
 
-// // Initialize X-axis
-// const xScale = d3.scaleTime()
-//                  .range([0, width]);
-// const xAxis = d3.axisBottom(xScale);
-// worldMortalityRateTrendSvg.append("g")
-//                             .attr("transform", `translate(0, ${height})`)
-//                             .attr("class", "xAxis");
+// Initialize Y-axis
+const worldYScale = d3.scaleLinear()
+                   .range([height, 0]);
+const worldYAxis = d3.axisLeft(worldYScale);
+worldMortalityRateTrendSvg.append("g")
+                       .attr("class", "worldYAxis");
 
-// // Initialize Y-axis
-// const yScale = d3.scaleLinear()
-//                  .range([height, 0]);
-// const yAxis = d3.axisLeft(yScale);
-// worldMortalityRateTrendSvg.append("g")
-//                             .attr("class", "yAxis");
+// Initialize colors
+const worldColorScale = d3.scaleOrdinal()
+                          .range(d3.schemeCategory10);
 
-// // Initialize colors
-// const colorScale = d3.scaleOrdinal()
-//                      .range(d3.schemeCategory10);
+// Hover tooltip
+let worldTooltip = d3.select("#world-mortality-rate-trend")
+                  .append("div")
+                    .attr("id", "world-tooltip")
+                    .style("position", "absolute")
+                    .style("background-color", "#D3D3D3")
+                    .style("padding", "6px")
+                    .style("display", "none")
+
+let worldVert = worldMortalityRateTrendSvg.append("g")
+                                    .attr("class", "mouse-over-effects")
+
+worldVert.append("path")
+        .attr("class", "world-mouse-line")
+        .style("stroke", "#A9A9A9")
+        .style("stroke-width", "1px")
+        .style("opacity", "0");
 
 // // Line chart
-// function drawWorldMortalityRateTrendChart(data) {
-//   // Group data with respect to state_id
-//   var groupedData = d3.group(data, function(d) {
-//     return d.COUNTRY_ID;
-//   });
+function drawWorldMortalityRateTrendChart(data) {
+  // Group data with respect to state_id
+  let groupedData = d3.group(data, function(d) {
+    return d.COUNTRY_ID;
+  });
+  console.log(groupedData);
 //   // Create X-axis
-//   xScale.domain(d3.extent(data, function(d) {
-//     return new Date(d.RECORD_DATE);
-//   }));
-//   worldMortalityRateTrendSvg.selectAll(".xAxis")
-//                               .transition()
-//                               .duration(500)
-//                               .call(xAxis);
+worldXScale.domain(d3.extent(data, function(d) {
+    return new Date(d.RECORD_DATE);
+  }));
+  worldMortalityRateTrendSvg.selectAll(".worldXAxis")
+                              .transition()
+                              .duration(500)
+                              .call(worldXAxis);
 
 //   // Create Y-axis
-//   yScale.domain(d3.extent(data, function(d) {
-//     return new Date(d.DEATH_RATE);
-//   }));
-//   worldMortalityRateTrendSvg.selectAll(".yAxis")
-//                               .transition()
-//                               .duration(500)
-//                               .call(yAxis);
+worldYScale.domain(d3.extent(data, function(d) {
+    return new Date(d.DEATH_RATE);
+  }));
+  worldMortalityRateTrendSvg.selectAll(".worldYAxis")
+                              .transition()
+                              .duration(500)
+                              .call(worldYAxis);
 
 //   // Create colors
-//   colorScale.domain(groupedData.keys());
+worldColorScale.domain(groupedData.keys());
 
-//   // Draw lines
-//   worldMortalityRateTrendSvg.selectAll(".line")
-//                             .data(groupedData)
-//                             .join("path")
-//                               .attr("class", "line")
-//                               .attr("stroke-width", 1.5)
-//                               .attr("stroke", function(d) {
-//                                 return colorScale(d[0]);
-//                               })
-//                               .attr("fill", "none")
-//                               .transition()
-//                               .duration(500)
-//                               .attr(
-//                                 "d",
-//                                 function(d) {
-//                                   return d3.line()
-//                                           .x(function(d) {
-//                                             return xScale(new Date(d.RECORD_DATE));
-//                                           })
-//                                           .y(function(d) {
-//                                             return yScale(+d.DEATH_RATE);
-//                                           })
-//                                           (d[1])
-//                                 }
-//       )
+  let worldMousePerLine = worldVert.selectAll(".world-mouse-per-line")
+  .data(groupedData)
+  .join("g")
+    .attr("class", "world-mouse-per-line");
 
-//   // Label chart
-//   worldMortalityRateTrendSvg.append("text")
-//                               .attr("x", width / 2)
-//                               .attr("y", 0)
-//                               .style("text-anchor", "middle")
-//                               .style("font-size", "1.5em")
-//                               .text("World Mortality Rate Trend Query");
+worldMousePerLine.append("circle")
+  .attr("r", 4)
+  .style("stroke", function(d) {
+    return worldColorScale(d[0]);
+  })
+  .style("fill", "none")
+  .style("stroke-width", "1px")
+  .style("opacity", "0")
 
-//   // Label axes
-//   // X-axis
-//   worldMortalityRateTrendSvg.append("text")
-//                               .attr("x", width / 2)
-//                               .attr("y", height + margin.bottom / 4)
-//                               .attr("dy", "1.5em")
-//                               .style("text-anchor", "middle")
-//                               .text("Date");
-//   // Y-axis
-//   worldMortalityRateTrendSvg.append("text")
-//                               .attr("transform", "rotate(-90)")
-//                               .attr("x", -height / 2)
-//                               .attr("y", -margin.left / 4)
-//                               .attr("dy", "-1.1em")
-//                               .style("text-anchor", "middle")
-//                               .text("Death Rate");
-// }
+worldVert.append("svg:rect")
+  .attr("width", width) 
+  .attr("height", height)
+  .attr("fill", "none")
+  .attr("pointer-events", "all")
+  .on("mouseout", function() {
+    d3.select(".world-mouse-line")
+        .style("opacity", "0");
+    d3.selectAll(".world-mouse-per-line circle")
+        .style("opacity", "0");
+    d3.selectAll(".world-mouse-per-line text")
+        .style("opacity", "0");
+    d3.selectAll("#world-tooltip")
+        .style('display', 'none')
+  })
+  .on('mouseover', function() {
+    d3.select(".world-mouse-line")
+        .style("opacity", "1");
+    d3.selectAll(".world-mouse-per-line circle")
+        .style("opacity", "1");
+    d3.selectAll("#world-tooltip")
+        .style('display', 'block')
+  })
+  .on('mousemove', function(e) {
+    let mouse = d3.pointer(e)
+    let xDate = worldXScale.invert(mouse[0])
+    d3.selectAll(".world-mouse-per-line")
+        .attr("transform", function (d, i) {
+          let bisect = d3.bisector(function (d) {
+            return new Date(d.RECORD_DATE);
+          }).left
+          let idx = bisect(d[1], xDate);
+          let record_date = new Date(d[1][idx].RECORD_DATE)
+          let death_rate = +d[1][idx].DEATH_RATE
+          d3.select(".world-mouse-line")
+              .attr("d", function () {
+                let data = "M" + worldXScale(record_date) + "," + (height);
+                data += " " + worldXScale(record_date) + "," + 0;
+                return data;
+              });
+          return "translate(" + worldXScale(record_date) + "," + worldYScale(death_rate) + ")";
+        });
 
-// // Default
-// function drawDefaultWorldDeathRateTrendChart() {
-//   let fromDate = $('#from-date').val();
-//   let toDate = $('#to-date').val();
-//   let id = $("#world-countries").val();
-//   d3.json(worldMortalityRateTrendApi, {
-//     method: "POST",
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify({
-//       fromDate: fromDate,
-//       toDate: toDate,
-//       id: id
-//     })
-//   })
-//   .then(drawWorldMortalityRateTrendChart)
-//   .catch(displayErrors);
-// }
+worldTooltip.html(`${xDate.toDateString()}`)
+     .style('display', 'block')
+     .style('left', `${e.pageX + 20}px`)
+     .style('top', `${e.pageY - 20}px`)
+     .style('font-size', "10px")
+     .selectAll()
+     .data(groupedData)
+     .join('div')
+     .style('color', d => {
+       return worldColorScale(d[0])
+     })
+     .html(d => {
+       let xDate = worldXScale.invert(mouse[0])
+       let bisect = d3.bisector(function (d) {
+        return new Date(d.RECORD_DATE);
+      }).left
+       let idx = bisect(d[1], xDate)
+       return d[0] + ": " +d[1][idx].DEATH_RATE.toFixed(2)
+     })
+});
 
-// // Send AJAX request on form submit
-// $("form").submit(function(e){
-//   e.preventDefault();
-//   let fromDate = $('#from-date').val();
-//   let toDate = $('#to-date').val();
-//   let id = $("#world-countries").val();
-//   d3.json(worldMortalityRateTrendApi, {
-//     method: "POST",
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify({
-//       fromDate: fromDate,
-//       toDate: toDate,
-//       id: id
-//     })
-//   })
-//   .then(drawWorldMortalityRateTrendChart)
-//   .catch(displayErrors);
-//   d3.json(worldMortalityRateSummaryApi, {
-//     method: "POST",
-//     headers: {
-//       'Content-Type': 'application/json'
-//     },
-//     body: JSON.stringify({
-//       id: id
-//     })
-//   })
-//   .catch(displayErrors);
-// });
+// Draw lines
+  worldMortalityRateTrendSvg.selectAll(".line")
+                            .data(groupedData)
+                            .join("path")
+                              .attr("class", "line")
+                              .attr("stroke-width", 1.5)
+                              .attr("stroke", function(d) {
+                                return worldColorScale(d[0]);
+                              })
+                              .attr("fill", "none")
+                              .transition()
+                              .duration(500)
+                              .attr(
+                                "d",
+                                function(d) {
+                                  return d3.line()
+                                          .x(function(d) {
+                                            return worldXScale(new Date(d.RECORD_DATE));
+                                          })
+                                          .y(function(d) {
+                                            return worldYScale(+d.DEATH_RATE);
+                                          })
+                                          (d[1])
+                                }
+      )
+
+  // Label chart
+  worldMortalityRateTrendSvg.append("text")
+                              .attr("x", width / 2)
+                              .attr("y", 0)
+                              .style("text-anchor", "middle")
+                              .style("font-size", "1.5em")
+                              .text("World Mortality Rate Trend Query");
+
+  // Label axes
+  // X-axis
+  worldMortalityRateTrendSvg.append("text")
+                              .attr("x", width / 2)
+                              .attr("y", height + margin.bottom / 4)
+                              .attr("dy", "1.5em")
+                              .style("text-anchor", "middle")
+                              .text("Date");
+  // Y-axis
+  worldMortalityRateTrendSvg.append("text")
+                              .attr("transform", "rotate(-90)")
+                              .attr("x", -height / 2)
+                              .attr("y", -margin.left / 4)
+                              .attr("dy", "-1.1em")
+                              .style("text-anchor", "middle")
+                              .text("Death Rate");
+}
+
+// Default
+function drawDefaultWorldDeathRateTrendChart() {
+  let fromDate = $('#world-from-date').val();
+  let toDate = $('#world-to-date').val();
+  let id = $("#world-countries").val();
+  d3.json(worldMortalityRateTrendApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fromDate: fromDate,
+      toDate: toDate,
+      id: id
+    })
+  })
+  .then(drawWorldMortalityRateTrendChart)
+  .catch(displayErrors);
+}
+
+// Send AJAX request on form submit
+$("#world-mortality-rate form").submit(function(e){
+  e.preventDefault();
+  let fromDate = $('#world-from-date').val();
+  let toDate = $('#world-to-date').val();
+  let id = $("#world-countries").val();
+  console.log(fromDate, toDate, id);
+  d3.json(worldMortalityRateTrendApi, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      fromDate: fromDate,
+      toDate: toDate,
+      id: id
+    })
+  })
+  .then(drawWorldMortalityRateTrendChart)
+  .catch(displayErrors);
+  // d3.json(worldMortalityRateSummaryApi, {
+  //   method: "POST",
+  //   headers: {
+  //     'Content-Type': 'application/json'
+  //   },
+  //   body: JSON.stringify({
+  //     id: id
+  //   })
+  // })
+  // .catch(displayErrors);
+});

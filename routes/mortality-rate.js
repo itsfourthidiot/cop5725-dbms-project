@@ -33,14 +33,14 @@ async function usMortalityTrend (req, res) {
                 daily_positive_cases,
                 daily_deaths,
                 county_id
-            FROM County_covid_data
+            FROM "N.SAOJI".County_covid_data
             WHERE
                 county_id IN
                 (
-                    SELECT id FROM County
+                    SELECT id FROM "N.SAOJI".County
                     WHERE state_id IN (${id})
                 )
-        ) f1 INNER JOIN County f2
+        ) f1 INNER JOIN "N.SAOJI".County f2
         ON f1.county_id = f2.id
         GROUP BY f1.record_date, f2.state_id
     )

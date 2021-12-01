@@ -44,7 +44,7 @@ fetch(worldCountriesApi)
 
 // World positivity trend API
 const worldPositivityTrendApi = "http://localhost:3000/api/positivity-world/world-positivity-trend";
-const worldPositivitySummaryApi = "http://localhost:3000/api/positivity-world/world-positivity-summary";
+// const worldPositivitySummaryApi = "http://localhost:3000/api/positivity-world/world-positivity-summary";
 
 // SVG configurations
 const margin = {
@@ -58,6 +58,7 @@ const height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 const worldPositivityTrendSvg = d3.select("#world-positivity-trend")
+                                  .append("svg")
                                   .attr("width", width + margin.left + margin.right)
                                   .attr("height", height + margin.top + margin.bottom)
                                 .append("g")
@@ -82,13 +83,35 @@ worldPositivityTrendSvg.append("g")
 const colorScale = d3.scaleOrdinal()
                      .range(d3.schemeCategory10);
 
+// Hover tooltip
+let tooltip = d3.select("#world-positivity-trend")
+                  .append("div")
+                    .attr("id", "tooltip")
+                    .style("position", "absolute")
+                    .style("background-color", "#D3D3D3")
+                    .style("padding", "6px")
+                    .style("display", "none")
+
+let vert = worldPositivityTrendSvg.append("g")
+                                    .attr("class", "mouse-over-effects")
+
+vert.append("path")
+      .attr("class", "mouse-line")
+      .style("stroke", "#A9A9A9")
+      .style("stroke-width", "1px")
+      .style("opacity", "0");
+
+
+
+
+
 // Line chart
 function drawWorldPositivityTrendChart(data) {
   // Group data with respect to state_id
   var groupedData = d3.group(data, function(d) {
     return d.COUNTRY_ID;
   });
-  console.log(groupedData);
+  
   // Create X-axis
   xScale.domain(d3.extent(data, function(d) {
     return new Date(d.RECORD_DATE);
@@ -99,7 +122,9 @@ function drawWorldPositivityTrendChart(data) {
                          .call(xAxis);
 
   // Create Y-axis
-  yScale.domain([0, 100]);
+  yScale.domain(d3.extent(data, function(d) {
+    return +d.POSITIVITY_RATE;
+  }));
   worldPositivityTrendSvg.selectAll(".yAxis")
                          .transition()
                          .duration(500)
@@ -107,6 +132,87 @@ function drawWorldPositivityTrendChart(data) {
 
   // Create colors
   colorScale.domain(groupedData.keys());
+
+  let mousePerLine = vert.selectAll(".mouse-per-line")
+  .data(groupedData)
+  .join("g")
+    .attr("class", "mouse-per-line");
+
+mousePerLine.append("circle")
+            .attr("r", 4)
+            .style("stroke", function(d) {
+            return colorScale(d[0]);
+            })
+            .style("fill", "none")
+            .style("stroke-width", "1px")
+            .style("opacity", "0")
+
+vert.append("svg:rect")
+.attr("width", width) 
+.attr("height", height)
+.attr("fill", "none")
+.attr("pointer-events", "all")
+.on("mouseout", function() {
+d3.select(".mouse-line")
+.style("opacity", "0");
+d3.selectAll(".mouse-per-line circle")
+.style("opacity", "0");
+d3.selectAll(".mouse-per-line text")
+.style("opacity", "0");
+d3.selectAll("#tooltip")
+.style('display', 'none')
+})
+.on('mouseover', function() {
+d3.select(".mouse-line")
+.style("opacity", "1");
+d3.selectAll(".mouse-per-line circle")
+.style("opacity", "1");
+d3.selectAll("#tooltip")
+.style('display', 'block')
+})
+.on('mousemove', function(e) {
+let mouse = d3.pointer(e)
+let xDate = xScale.invert(mouse[0])
+d3.selectAll(".mouse-per-line")
+.attr("transform", function (d, i) {
+let bisect = d3.bisector(function (d) {
+return new Date(d.RECORD_DATE);
+}).left
+let idx = bisect(d[1], xDate);
+let record_date = new Date(d[1][idx].RECORD_DATE)
+let positivity_rate = +d[1][idx].POSITIVITY_RATE
+d3.select(".mouse-line")
+.attr("d", function () {
+let data = "M" + xScale(record_date) + "," + (height);
+data += " " + xScale(record_date) + "," + 0;
+return data;
+});
+return "translate(" + xScale(record_date) + "," + yScale(positivity_rate) + ")";
+});
+
+tooltip.html(`${xDate.toDateString()}`)
+.style('display', 'block')
+.style('left', `${e.pageX + 20}px`)
+.style('top', `${e.pageY - 20}px`)
+.style('font-size', "10px")
+.selectAll()
+.data(groupedData)
+.join('div')
+.style('color', d => {
+return colorScale(d[0])
+})
+.html(d => {
+var xDate = xScale.invert(mouse[0])
+let bisect = d3.bisector(function (d) {
+return new Date(d.RECORD_DATE);
+}).left
+var idx = bisect(d[1], xDate)
+return d[0] + ": " +d[1][idx].POSITIVITY_RATE.toFixed(2)
+})
+});
+
+
+
 
   // Draw lines
   worldPositivityTrendSvg.selectAll(".line")
@@ -200,14 +306,14 @@ $("form").submit(function(e){
   })
   .then(drawWorldPositivityTrendChart)
   .catch(displayErrors);
-  d3.json(worldPositivitySummaryApi, {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      id: id
-    })
-  })
-  .catch(displayErrors);
+  // d3.json(worldPositivitySummaryApi, {
+  //   method: "POST",
+  //   headers: {
+  //     'Content-Type': 'application/json'
+  //   },
+  //   body: JSON.stringify({
+  //     id: id
+  //   })
+  // })
+  // .catch(displayErrors);
 });
