@@ -17,8 +17,8 @@ router.get('/mortality-rate', function(req, res, next) {
   res.render('mortality-rate', { title: 'Mortality Rate Page' });
 });
 
-router.get('/community', function(req, res, next) {
-  res.render('community', { title: 'Community Page' });
+router.get('/community-transmission', function(req, res, next) {
+  res.render('community-transmission', { title: 'Community Transmission Page' });
 });
 
 router.get('/hospitalization', function(req, res, next) {
@@ -28,10 +28,5 @@ router.get('/hospitalization', function(req, res, next) {
 router.get('/positivity-world', function(req, res, next) {
   res.render('positivity-world', { title: 'Positivity rate Page' });
 });
-
-router.get('/usmortality-rate', function(req, res, next) {
-  res.render('usmortality-rate', { title: 'US Mortality Rate Page' });
-});
-
 
 module.exports = router;

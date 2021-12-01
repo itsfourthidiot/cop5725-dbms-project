@@ -7,11 +7,11 @@ const config = {
   connectString: process.env.DB_CONNECT_STRING
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////// Query 2: Community Transmission
-/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////// Community Transmission Trend
+////////////////////////////////////////////////////////////////////////////////
 
-async function community (req, res) {
+async function communityTransmission (req, res) {
   let connection, result;
   try {
     // Parse user input
@@ -87,6 +87,11 @@ async function community (req, res) {
   }
 };
 
+router.post('/community-transmission-trend', function (req, res) {
+  console.log("[INFO] POST /api/community-transmisson/community-transmisson-trend route...");
+  communityTransmission(req, res);
+})
+
 async function communitySummary (req, res) {
   let connection, result;
   try {
@@ -123,17 +128,11 @@ async function communitySummary (req, res) {
   }
 };
 
-router.post('/community-trend', function (req, res) {
-  console.log("[INFO] POST /api/community-trend route...");
-  community(req, res);
-})
 
 router.post('/community-summary', function (req, res) {
   console.log("[INFO] POST /api/community-summary route...");
   communitySummary(req, res);
 })
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 module.exports = router;
