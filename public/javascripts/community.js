@@ -11,7 +11,7 @@ function parseJSON(response) {
 
 function populateDropdown(data) {
   for(let i=0; i<data.length; i++) {
-      if(data[i].NAME == "Florida") {
+      if(data[i].NAME == "Alaska") {
         $("#us-states").append(
           `<option value=${data[i].ID} selected>${data[i].NAME}</option>`
         )

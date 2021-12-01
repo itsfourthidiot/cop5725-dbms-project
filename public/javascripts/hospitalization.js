@@ -88,6 +88,8 @@ function drawUsHospitalizationTrendChart(data) {
   var groupedData = d3.group(data, function(d) {
     return d.STATE_ID;
   });
+
+  console.log(groupedData);
   // Create X-axis
   xScale.domain(d3.extent(data, function(d) {
     return new Date(d.RECORD_DATE);
@@ -98,7 +100,9 @@ function drawUsHospitalizationTrendChart(data) {
                          .call(xAxis);
 
   // Create Y-axis
-  yScale.domain([0, 100]);
+  yScale.domain(d3.extent(data, function(d) {
+    return +d.COVID_ICU_BED_OCCUPANCY;
+  }));
   usHospitalizationTrendSvg.selectAll(".yAxis")
                          .transition()
                          .duration(500)
@@ -127,7 +131,7 @@ function drawUsHospitalizationTrendChart(data) {
                     return xScale(new Date(d.RECORD_DATE));
                   })
                   .y(function(d) {
-                    return yScale(+d.CUMULATIVE_FIRST_DOSES_PERCENTAGE);
+                    return yScale(+d.COVID_ICU_BED_OCCUPANCY);
                   })
                   (d[1])
         }
@@ -197,7 +201,7 @@ $("form").submit(function(e){
       id: id
     })
   })
-  .then(drawUsHospitalizatioTrendChart)
+  .then(drawUsHospitalizationTrendChart)
   .catch(displayErrors);
   d3.json(usHospitalizationSummaryApi, {
     method: "POST",

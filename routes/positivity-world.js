@@ -15,33 +15,37 @@ async function worldPositivityTrend (req, res) {
   let connection, result;
   try {
     // Parse user input
+    let fromDate = req.body.fromDate;
+    let toDate = req.body.toDate;
     let id = req.body.id;
     // Construct SQL statement
     let sql = `
     WITH Filtered(record_date, daily_tests, daily_positive_cases, country_id) AS
-(
+    (
+        SELECT
+            ccd.RECORD_DATE AS record_date,
+            ccd.DAILY_TESTS AS daily_tests,
+            ccd.DAILY_POSITIVE_CASES AS daily_positive_cases,
+            ccd.COUNTRY_ID AS country_id
+        FROM "N.SAOJI".COUNTRY_COVID_DATA ccd
+        WHERE
+            (ccd.DAILY_TESTS IS NOT NULL) AND
+            (ccd.DAILY_POSITIVE_CASES IS NOT NULL) AND
+            (ccd.DAILY_TESTS > ccd.DAILY_POSITIVE_CASES) AND
+            (ccd.COUNTRY_ID IN (${id}))
+    )
     SELECT
-        record_date,
-        daily_tests,
-        daily_positive_cases,
-        country_id
-    FROM Country_covid_data
-    WHERE
-        (daily_tests IS NOT NULL) AND
-        (daily_positive_cases IS NOT NULL) AND
-        (daily_tests > daily_positive_cases) AND
-        (country_id IN (${id}))
-)
-SELECT
-   f.record_date,
-   f.daily_tests,
-   f.daily_positive_cases,
-   ROUND(((f.daily_positive_cases / f.daily_tests) * 100), 2) AS positivity_rate,
-   c.id AS country_id,
-   c.name
-FROM Filtered f
-INNER JOIN Country c
-ON f.country_id = c.id;`
+      f.record_date,
+      f.daily_tests,
+      f.daily_positive_cases,
+      ROUND(((f.daily_positive_cases / f.daily_tests) * 100), 2) AS positivity_rate,
+      c.id AS country_id,
+      c.name
+    FROM Filtered f
+    INNER JOIN "N.SAOJI".COUNTRY c 
+    ON f.country_id = c.id
+    WHERE (record_date BETWEEN \'${fromDate}' AND \'${toDate}')
+    ORDER BY record_date`
     // Creat db connection
     connection = await oracledb.getConnection(config);
     result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});

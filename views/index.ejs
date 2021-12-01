@@ -1,11 +1,9 @@
 <%- include("partials/head") %>
-  <header>
+<%- include("partials/navbar") %>
+  <header class="text-center">
     <h1>Group 09</h1>
     <h2>COVID-19 impact on US and trend comparison with the world.</h2>
   </header>
-  
-  <ul class="list">
-  </ul>
   <div class="container">
     <div class="row">
       <div class="col-sm">
@@ -13,7 +11,7 @@
           <div class="card-body">
             <h5 class="card-title">Positivity Rate</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <a href="/positivity-rate" class="btn btn-primary">Go somewhere</a>
           </div>
         </div>
       </div>
@@ -22,7 +20,7 @@
           <div class="card-body">
             <h5 class="card-title">Death Rate</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <a href="mortality-rate" class="btn btn-primary">Go somewhere</a>
           </div>
         </div>
       </div>
@@ -31,19 +29,19 @@
           <div class="card-body">
             <h5 class="card-title">Community Transmission</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <a href="/community" class="btn btn-primary">Go somewhere</a>
           </div>
         </div>
       </div>
     </div>
- <!-- 2nd row -->
+    <!-- 2nd row -->
     <div class="row justify-content-md-center">
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Vaccination</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <a href="/vaccination" class="btn btn-primary">Go somewhere</a>
           </div>
         </div>
       </div>
@@ -52,31 +50,17 @@
           <div class="card-body">
             <h5 class="card-title">Hospitalization</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+            <a href="/hospitalization" class="btn btn-primary">Go somewhere</a>
           </div>
         </div>
       </div>
     </div>
-
-
-
     <!-- 3rd row  -->
     <div class="row justify-content-md-center">
-      <div class="text-centre col">
-        <button type="button" class="btn btn-primary btn-lg ">Number of Rows</button>
-    
+      <div class="col-3">
+        <button id="num-rows" type="button" class="btn btn-primary btn-lg ">Number of Rows</button>
       </div>
-
     </div>
-
-
-
   </div>
-
-
-  
-    
-  
-    
-  <script src='/javascripts/index.js'></script>
+<script src='/javascripts/index.js'></script>
 <%- include("partials/footer") %>

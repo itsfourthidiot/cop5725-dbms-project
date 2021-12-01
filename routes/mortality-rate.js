@@ -69,6 +69,11 @@ async function worldMortalityRate (req, res) {
   }
 };
 
+router.post('/world-mortality-rate-trend', function (req, res) {
+  console.log("[INFO] POST /api/mortality-rate/world-mortality-rate-trend route...");
+  worldMortalityRate(req, res);
+})
+
 async function worldMortalityRateSummary (req, res) {
   let connection, result;
   try {
@@ -105,10 +110,7 @@ async function worldMortalityRateSummary (req, res) {
   }
 };
 
-router.post('/world-mortality-rate-trend', function (req, res) {
-  console.log("[INFO] POST /api/mortality-rate/world-mortality-rate-trend route...");
-  worldMortalityRate(req, res);
-})
+
 
 router.post('/world-mortality-rate-summary', function (req, res) {
   console.log("[INFO] POST /api/mortality-rate/world-mortality-rate-summary route...");

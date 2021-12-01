@@ -128,7 +128,7 @@ function drawWorldPositivityTrendChart(data) {
                     return xScale(new Date(d.RECORD_DATE));
                   })
                   .y(function(d) {
-                    return yScale(+d.CUMULATIVE_VACCINATIONS_PERCENTAGE);
+                    return yScale(+d.POSITIVITY_RATE);
                   })
                   (d[1])
         }

@@ -43,7 +43,7 @@ fetch(usStatesApi)
 ////////////////////////////////////////////////////////////////////////////////
 
 // US Mortality trend API
-const usMortalityTrendApi = "http://localhost:3000/api/mortality/us-mortality-trend";
+const usMortalityTrendApi = "http://localhost:3000/api/usmortality-rate/us-mortality-trend";
 const usMortalitySummaryApi = "http://localhost:3000/api/mortality/us-mortality-summary";
 
 // SVG configurations
@@ -98,7 +98,9 @@ function drawUsMortalityTrendChart(data) {
                          .call(xAxis);
 
   // Create Y-axis
-  yScale.domain([0, 100]);
+  yScale.domain(d3.extent(data, function(d) {
+    return +d.DEATH_RATE;
+  }));
   usMortalityTrendSvg.selectAll(".yAxis")
                          .transition()
                          .duration(500)
@@ -127,7 +129,7 @@ function drawUsMortalityTrendChart(data) {
                     return xScale(new Date(d.RECORD_DATE));
                   })
                   .y(function(d) {
-                    return yScale(+d.CUMULATIVE_FIRST_DOSES_PERCENTAGE);
+                    return yScale(+d.DEATH_RATE);
                   })
                   (d[1])
         }

@@ -15,55 +15,58 @@ async function usMortalityTrend (req, res) {
   let connection, result;
   try {
     // Parse user input
+    let fromDate = req.body.fromDate;
+    let toDate = req.body.toDate;
     let id = req.body.id;
     // Construct SQL statement
     let sql =  `
     WITH Filtered(record_date, state_daily_positive_cases, state_daily_deaths, state_id) AS
-(
+    (
+        SELECT
+            f1.record_date,
+            SUM(f1.daily_positive_cases) AS state_daily_positive_cases,
+            SUM(f1.daily_deaths) AS state_daily_deaths,
+            f2.state_id AS state_id
+        FROM
+        (
+            SELECT
+                record_date,
+                daily_positive_cases,
+                daily_deaths,
+                county_id
+            FROM County_covid_data
+            WHERE
+                county_id IN
+                (
+                    SELECT id FROM County
+                    WHERE state_id IN (${id})
+                )
+        ) f1 INNER JOIN County f2
+        ON f1.county_id = f2.id
+        GROUP BY f1.record_date, f2.state_id
+    )
     SELECT
-        f1.record_date,
-        SUM(f1.daily_positive_cases) AS state_daily_positive_cases,
-        SUM(f1.daily_deaths) AS state_daily_deaths,
-        f2.state_id AS state_id
+        record_date,
+        state_cumulative_positive_cases,
+        state_cumulative_deaths,
+        CASE
+            WHEN state_cumulative_positive_cases=0 THEN 0
+            ELSE ROUND((state_cumulative_deaths / state_cumulative_positive_cases) * 100, 2)
+        END AS death_rate,
+        state_id
     FROM
     (
         SELECT
             record_date,
-            daily_positive_cases,
-            daily_deaths,
-            county_id
-        FROM County_covid_data
-        WHERE
-             county_id IN
-            (
-                SELECT id FROM County
-                WHERE state_id IN (${id})
-            )
-    ) f1 INNER JOIN County f2
-    ON f1.county_id = f2.id
-    GROUP BY f1.record_date, f2.state_id
-)
-SELECT
-    record_date,
-    state_cumulative_positive_cases,
-    state_cumulative_deaths,
-    CASE
-        WHEN state_cumulative_positive_cases=0 THEN 0
-        ELSE ROUND((state_cumulative_deaths / state_cumulative_positive_cases) * 100, 2)
-    END AS death_rate,
-    state_id
-FROM
-(
-    SELECT
-        record_date,
-        state_daily_positive_cases,
-        NVL(SUM (state_daily_positive_cases) OVER (PARTITION BY state_id ORDER BY record_date), 0) AS state_cumulative_positive_cases,
-        state_daily_deaths,
-        NVL(SUM (state_daily_deaths) OVER (PARTITION BY state_id ORDER BY record_date), 0) AS state_cumulative_deaths,
-        state_id
-    FROM Filtered
-)
-ORDER BY state_id, record_date;`
+            state_daily_positive_cases,
+            NVL(SUM (state_daily_positive_cases) OVER (PARTITION BY state_id ORDER BY record_date), 0) AS state_cumulative_positive_cases,
+            state_daily_deaths,
+            NVL(SUM (state_daily_deaths) OVER (PARTITION BY state_id ORDER BY record_date), 0) AS state_cumulative_deaths,
+            state_id
+        FROM Filtered
+    )
+    WHERE record_date BETWEEN \'${fromDate}' AND \'${toDate}'
+    ORDER BY state_id, record_date`;
 
     // Creat db connection
     connection = await oracledb.getConnection(config);
@@ -116,12 +119,12 @@ async function usMortalitySummary (req, res) {
 };
 
 router.post('/us-mortality-trend', function (req, res) {
-  console.log("[INFO] POST /api/mortality/us-mortality-trend route...");
+  console.log("[INFO] POST /api/usmortality-rate/us-mortality-trend route...");
   usMortalityTrend(req, res);
 })
 
 router.post('/us-mortality-summary', function (req, res) {
-  console.log("[INFO] POST /api/mortality/us-mortality-summary route...");
+  console.log("[INFO] POST /api/usmortality-rate/us-mortality-summary route...");
   usMortalitySummary(req, res);
 })
 
