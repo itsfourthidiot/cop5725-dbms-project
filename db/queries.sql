@@ -40,14 +40,14 @@ WITH Filtered(record_date, state_daily_positive_cases, state_daily_deaths, state
             daily_positive_cases,
             daily_deaths,
             county_id
-        FROM County_covid_data
+        FROM "N.SAOJI".County_covid_data
         WHERE
              county_id IN
             (
-                SELECT id FROM County
+                SELECT id FROM "N.SAOJI".County
                 WHERE state_id IN (1, 2, 3, 4, 5)
             )
-    ) f1 INNER JOIN County f2
+    ) f1 INNER JOIN "N.SAOJI".County f2
     ON f1.county_id = f2.id
     GROUP BY f1.record_date, f2.state_id
 )
@@ -234,27 +234,33 @@ ON t1.country_id = c.id
 WHERE (record_date BETWEEN '01-Jan-2020' AND '01-Jan-2022');
 
 --Bed VS Death Comparision
-SELECT fsid AS "State ID", fsn AS "State Name", tab AS "Total Beds", cbo AS "Covid ICU Bed Occupancy", tpc AS "Total Positive Cases", td AS "Total Deaths", dt AS "Date"
+SELECT fsid AS "State ID", fname AS "State Name", dt AS "Date", taib AS "Total ICU Beds", taicb AS "Covid ICU Bed Occupancy", 
+prtb AS "Percentage of Covid Bed Coverage vs ICU Bed", tpc AS "Total Positive Cases", td AS "Total Covid Deaths"
 FROM 
 (
-    WITH bedinfo (sid, rd, tb, coib) AS
+    WITH bedinfo (sid, rd, icb, ctb, icbc, ctbc, fctbib) AS
     (
-        SELECT hd.STATE_ID, hd.RECORD_DATE, SUM(hd.TOTAL_BEDS), SUM(hd.COVID_OCCUPIED_ICU_BEDS) FROM "N.SAOJI".HOSPITALIZATION_DATA hd, "N.SAOJI".STATE s 
-        WHERE hd.STATE_ID = s.ID
-        GROUP BY hd.STATE_ID, hd.RECORD_DATE
+        SELECT hd.STATE_ID, hd.RECORD_DATE, SUM(hd.ICU_BEDS), SUM(hd.COVID_OCCUPIED_ICU_BEDS), SUM(hd.ICU_BEDS_COVERAGE), 
+        SUM(hd.COVID_OCCUPIED_ICU_BEDS_COVERAGE), 
+        ROUND(SUM(hd.COVID_OCCUPIED_ICU_BEDS) * (SUM(hd.ICU_BEDS_COVERAGE)/SUM(hd.COVID_OCCUPIED_ICU_BEDS_COVERAGE))) AS fctbib
+		FROM "N.SAOJI".HOSPITALIZATION_DATA hd, "N.SAOJI".STATE s3  
+		WHERE s3.ID = hd.STATE_ID AND hd.ICU_BEDS IS NOT NULL AND hd.COVID_OCCUPIED_ICU_BEDS IS NOT NULL AND hd.ICU_BEDS != 0 
+		GROUP BY hd.STATE_ID, hd.RECORD_DATE
     ),
     deathinfo (sid2, rd2, dpc, dd) AS
     (
-        SELECT s.ID, ccd.RECORD_DATE, SUM(ccd.DAILY_POSITIVE_CASES), SUM(ccd.DAILY_DEATHS) FROM "N.SAOJI".STATE s, "N.SAOJI".COUNTY c , "N.SAOJI".COUNTY_COVID_DATA ccd 
+        SELECT s.ID, ccd.RECORD_DATE, SUM(ccd.DAILY_POSITIVE_CASES), SUM(ccd.DAILY_DEATHS) 
+        FROM "N.SAOJI".STATE s, "N.SAOJI".COUNTY c , "N.SAOJI".COUNTY_COVID_DATA ccd 
         WHERE s.ID = c.STATE_ID AND c.ID = ccd.COUNTY_ID
         GROUP BY s.ID , ccd.RECORD_DATE 
     )
-    SELECT s2.ID AS fsid, s2.NAME AS fsn, bi.tb AS tab, bi.coib AS cbo, di.dpc AS tpc, di.dd AS td, bi.rd AS dt
+    SELECT s2.ID AS fsid, s2.NAME AS fname, bi.rd AS dt, bi.icb AS taib, bi.ctb AS taicb, bi.icbc AS taibc, bi.ctbc AS taicbc,
+    ROUND((bi.ctb/bi.icb)*100, 4) AS ptb, ROUND((fctbib/icb)*100, 4) AS prtb, di.dpc AS tpc, di.dd AS td
     FROM "N.SAOJI".STATE s2, bedinfo bi, deathinfo di
-    WHERE s2.ID = bi.sid AND bi.sid = di.sid2 AND bi.rd = di.rd2
+    WHERE s2.ID = bi.sid AND bi.sid = di.sid2 AND bi.rd = di.rd2 
 )
-WHERE dt BETWEEN '15-MAR-21' AND '22-MAR-21' AND fsn IN ('California', 'Florida')
-ORDER BY fsn ASC, dt ASC;
+WHERE dt BETWEEN '15-JAN-20' AND '22-APR-21' AND fsid IN (1, 2)
+ORDER BY fsid ASC, dt ASC;
 
 --Overall Record Count of the DB
 SELECT t1.cryc+t2.ccdcryc+t3.couc+t4.ccdcouc+t5.hc+t7.vc+t6.sc AS TotalCount FROM 
@@ -337,3 +343,37 @@ FROM
         GROUP BY s.ID
     )
 )
+
+--FInal Summary Query Positivity
+SELECT name, SUM(positivity_rate) AS Positivity_Rate
+FROM (
+WITH Filtered(record_date, daily_tests, daily_positive_cases, country_id) AS
+(
+    SELECT
+        record_date,
+        daily_tests,
+        daily_positive_cases,
+        country_id
+    FROM "N.SAOJI".Country_covid_data
+    WHERE
+        (daily_tests IS NOT NULL) AND
+        (daily_positive_cases IS NOT NULL) AND
+        (daily_tests > daily_positive_cases) 
+        --AND (country_id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
+)
+SELECT
+   f.record_date,
+   f.daily_tests,
+   f.daily_positive_cases,
+   ROUND(((f.daily_positive_cases / f.daily_tests) * 100), 2) AS positivity_rate,
+   c.id AS country_id,
+   c.name AS name
+FROM Filtered f
+INNER JOIN "N.SAOJI".Country c
+ON f.country_id = c.id
+)
+GROUP BY name
+ORDER BY positivity_rate DESC 
+FETCH FIRST 3 ROWS ONLY;
+
+--Final SUmmary query Death US
