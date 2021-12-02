@@ -36,10 +36,7 @@ fetch(worldCountriesApi)
 .catch(displayErrors);
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////// Query 1:  World positivity trend
+//////////////////////////////////////////////////// World positivity rate trend
 ////////////////////////////////////////////////////////////////////////////////
 
 // World positivity trend API
@@ -53,8 +50,8 @@ const margin = {
   bottom: 50,
   left: 50
 };
-const width = 600 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 900 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 const worldPositivityTrendSvg = d3.select("#world-positivity-trend")
@@ -89,7 +86,7 @@ let tooltip = d3.select("#world-positivity-trend")
                     .attr("id", "tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "10px")
                     .style("display", "none")
 
 let vert = worldPositivityTrendSvg.append("g")
@@ -101,15 +98,11 @@ vert.append("path")
       .style("stroke-width", "1px")
       .style("opacity", "0");
 
-
-
-
-
 // Line chart
 function drawWorldPositivityTrendChart(data) {
   // Group data with respect to state_id
-  var groupedData = d3.group(data, function(d) {
-    return d.COUNTRY_ID;
+  let groupedData = d3.group(data, function(d) {
+    return d.COUNTRY_NAME;
   });
   
   // Create X-axis
@@ -122,9 +115,13 @@ function drawWorldPositivityTrendChart(data) {
                          .call(xAxis);
 
   // Create Y-axis
-  yScale.domain(d3.extent(data, function(d) {
-    return +d.POSITIVITY_RATE;
-  }));
+  yScale.domain([
+    d3.min(data, function(d) {
+      return +d.POSITIVITY_RATE
+    }),
+    d3.max(data, function(d) {
+      return +d.POSITIVITY_RATE;
+    }) * 1.25])
   worldPositivityTrendSvg.selectAll(".yAxis")
                          .transition()
                          .duration(500)
@@ -139,12 +136,12 @@ function drawWorldPositivityTrendChart(data) {
     .attr("class", "mouse-per-line");
 
 mousePerLine.append("circle")
-            .attr("r", 4)
+            .attr("r", 6)
             .style("stroke", function(d) {
             return colorScale(d[0]);
             })
             .style("fill", "none")
-            .style("stroke-width", "1px")
+            .style("stroke-width", "2px")
             .style("opacity", "0")
 
 vert.append("svg:rect")
@@ -194,7 +191,7 @@ tooltip.html(`${xDate.toDateString()}`)
 .style('display', 'block')
 .style('left', `${e.pageX + 20}px`)
 .style('top', `${e.pageY - 20}px`)
-.style('font-size', "10px")
+.style('font-size', "1em")
 .selectAll()
 .data(groupedData)
 .join('div')
@@ -210,9 +207,6 @@ var idx = bisect(d[1], xDate)
 return d[0] + ": " +d[1][idx].POSITIVITY_RATE.toFixed(2)
 })
 });
-
-
-
 
   // Draw lines
   worldPositivityTrendSvg.selectAll(".line")
@@ -246,7 +240,7 @@ return d[0] + ": " +d[1][idx].POSITIVITY_RATE.toFixed(2)
                          .attr("y", 0)
                          .style("text-anchor", "middle")
                          .style("font-size", "1.5em")
-                         .text("World Positivity Trend Query");
+                         .text("Positivity Rate Trend Query (World)");
 
   // Label axes
   // X-axis
@@ -261,9 +255,9 @@ return d[0] + ": " +d[1][idx].POSITIVITY_RATE.toFixed(2)
                          .attr("transform", "rotate(-90)")
                          .attr("x", -height / 2)
                          .attr("y", -margin.left / 4)
-                         .attr("dy", "-1.1em")
+                         .attr("dy", "-1.5em")
                          .style("text-anchor", "middle")
-                         .text("Cumulative Positivity Percentage");
+                         .text("Positivity Rate");
 }
 
 // Default

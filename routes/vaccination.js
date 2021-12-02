@@ -22,42 +22,39 @@ async function usVaccinationTrend (req, res) {
     let sql = `
     WITH Filtered(record_date, daily_first_doses, daily_fully_vaccinated, state_id) AS
     (
-        SELECT
-            record_date,
-            daily_first_doses,
-            daily_fully_vaccinated,
-            state_id
-        FROM "N.SAOJI".Vaccination_data
-        WHERE state_id IN (${id})
+      SELECT
+        record_date,
+        daily_first_doses,
+        daily_fully_vaccinated,
+        state_id
+      FROM "N.SAOJI".Vaccination_data
+      WHERE state_id IN (${id})
     )
     SELECT
-        TO_CHAR(t1.record_date, 'YYYY-MM-DD') AS record_date,
-        t1.cumulative_first_doses,
-        ROUND(((t1.cumulative_first_doses / t2.state_population) * 100), 2) AS cumulative_first_doses_percentage,
-        t1.cumulative_fully_vaccinated,
-        ROUND(((t1.cumulative_fully_vaccinated / t2.state_population) * 100), 2) AS cumulative_fully_vaccinated_percentage,
-        t2.state_id,
-        t2.state_name
+      t1.record_date,
+      ROUND(((t1.cumulative_first_doses / t2.state_population) * 100), 2) AS atleast_one_dose,
+      ROUND(((t1.cumulative_fully_vaccinated / t2.state_population) * 100), 2) AS fully_vaccinated,
+      ROUND((((t1.cumulative_first_doses + t1.cumulative_fully_vaccinated) * 1000) / t2.state_population), 2) AS total_doses_per_thousand,
+      t2.state_id,
+      t2.state_name
     FROM
     (
-        SELECT
-            record_date,
-            daily_first_doses,
-            SUM (daily_first_doses) OVER (PARTITION BY state_id ORDER BY record_date) AS cumulative_first_doses,
-            daily_fully_vaccinated,
-            SUM (daily_fully_vaccinated) OVER (PARTITION BY state_id ORDER BY record_date) AS cumulative_fully_vaccinated,
-            state_id
-        FROM Filtered
+      SELECT
+        record_date,
+        SUM (daily_first_doses) OVER (PARTITION BY state_id ORDER BY record_date) AS cumulative_first_doses,
+        SUM (daily_fully_vaccinated) OVER (PARTITION BY state_id ORDER BY record_date) AS cumulative_fully_vaccinated,
+        state_id
+      FROM Filtered
     ) t1 INNER JOIN
     (
-        SELECT
-            s.id AS state_id,
-            s.name AS state_name,
-            SUM(c.population) AS state_population
-        FROM "N.SAOJI".County c
-        INNER JOIN "N.SAOJI".State s
-        ON c.state_id = s.id
-        GROUP BY s.id, s.name
+      SELECT
+        s.id AS state_id,
+        s.name AS state_name,
+        SUM(c.population) AS state_population
+      FROM "N.SAOJI".County c
+      INNER JOIN "N.SAOJI".State s
+      ON c.state_id = s.id
+      GROUP BY s.id, s.name
     ) t2
     ON t1.state_id = t2.state_id
     WHERE (record_date BETWEEN \'${fromDate}' AND \'${toDate}')
@@ -130,7 +127,7 @@ router.post('/us-vaccination-summary', function (req, res) {
 })
 
 ////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////// Query 1:  US vaccination trend
+//////////////////////////////////////////////////////// World vaccination trend
 ////////////////////////////////////////////////////////////////////////////////
 
 async function worldVaccinationTrend (req, res) {
@@ -144,25 +141,22 @@ async function worldVaccinationTrend (req, res) {
     let sql = `
     WITH Filtered(record_date, daily_vaccinations, country_id) AS
     (
-        SELECT
-            record_date,
-            daily_vaccinations,
-            country_id
-        FROM "N.SAOJI".Country_covid_data
-        WHERE country_id IN (${id})
+      SELECT
+        record_date,
+        daily_vaccinations,
+        country_id
+      FROM "N.SAOJI".Country_covid_data
+      WHERE country_id IN (${id})
     )
     SELECT
-        record_date,
-        cumulative_vaccinations,
-        ((cumulative_vaccinations / population) * 100) AS cumulative_vaccinations_percentage,
-        population,
-        c.id AS country_id,
-        c.name AS country_name
+      record_date,
+      ROUND(((cumulative_vaccinations / population) * 1000000), 2) AS total_doses_per_million,
+      c.id AS country_id,
+      c.name AS country_name
     FROM
     (
         SELECT
             record_date,
-            daily_vaccinations,
             NVL(SUM(daily_vaccinations) OVER(PARTITION BY country_id ORDER BY record_date), 0) AS cumulative_vaccinations,
             country_id
         FROM Filtered

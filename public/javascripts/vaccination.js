@@ -20,10 +20,10 @@ const margin = {
   top: 50,
   right: 25,
   bottom: 50,
-  left: 50
+  left: 150
 };
-const width = 600 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 800 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 function displayErrors(err){
   console.log("INSIDE displayErrors!");
@@ -102,7 +102,7 @@ let usTooltip = d3.select("#us-vaccination-trend")
                     .attr("id", "us-tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "1em")
                     .style("display", "none")
 
 let usVert = usVaccinationTrendSvg.append("g")
@@ -118,7 +118,7 @@ usVert.append("path")
 function drawUsVaccinationTrendChart(data) {
   // Group data with respect to state_id
   let groupedData = d3.group(data, function(d) {
-    return d.STATE_ID;
+    return d.STATE_NAME;
   });
   
   // Create X-axis
@@ -131,7 +131,13 @@ function drawUsVaccinationTrendChart(data) {
                          .call(usXAxis);
 
   // Create Y-axis
-  usYScale.domain([0, 100]);
+  usYScale.domain([
+    d3.min(data, function(d) {
+      return +d.TOTAL_DOSES_PER_THOUSAND
+    }),
+    d3.max(data, function(d) {
+      return +d.TOTAL_DOSES_PER_THOUSAND;
+    }) * 1.25])
   usVaccinationTrendSvg.selectAll(".usYAxis")
                          .transition()
                          .duration(500)
@@ -146,12 +152,12 @@ function drawUsVaccinationTrendChart(data) {
                              .attr("class", "us-mouse-per-line");
 
   usMousePerLine.append("circle")
-                .attr("r", 4)
+                .attr("r", 6)
                 .style("stroke", function(d) {
                   return usColorScale(d[0]);
                 })
                 .style("fill", "none")
-                .style("stroke-width", "1px")
+                .style("stroke-width", "2px")
                 .style("opacity", "0")
 
   usVert.append("svg:rect")
@@ -187,21 +193,21 @@ function drawUsVaccinationTrendChart(data) {
                   }).left
                   let idx = bisect(d[1], xDate);
                   let record_date = new Date(d[1][idx].RECORD_DATE)
-                  let cumulative_first_doses_percentage = +d[1][idx].CUMULATIVE_FIRST_DOSES_PERCENTAGE
+                  let total_doses_per_thousand = +d[1][idx].TOTAL_DOSES_PER_THOUSAND
                   d3.select(".us-mouse-line")
                       .attr("d", function () {
                         let data = "M" + usXScale(record_date) + "," + (height);
                         data += " " + usXScale(record_date) + "," + 0;
                         return data;
                       });
-                  return "translate(" + usXScale(record_date) + "," + usYScale(cumulative_first_doses_percentage) + ")";
+                  return "translate(" + usXScale(record_date) + "," + usYScale(total_doses_per_thousand) + ")";
                 });
             
             usTooltip.html(`${xDate.toDateString()}`)
                    .style('display', 'block')
                    .style('left', `${e.pageX + 20}px`)
                    .style('top', `${e.pageY - 20}px`)
-                   .style('font-size', "10px")
+                   .style('font-size', "1em")
                    .selectAll()
                    .data(groupedData)
                    .join('div')
@@ -209,12 +215,12 @@ function drawUsVaccinationTrendChart(data) {
                      return usColorScale(d[0])
                    })
                    .html(d => {
-                     var xDate = usXScale.invert(mouse[0])
+                     let xDate = usXScale.invert(mouse[0])
                      let bisect = d3.bisector(function (d) {
                       return new Date(d.RECORD_DATE);
                     }).left
-                     var idx = bisect(d[1], xDate)
-                     return d[0] + ": " +d[1][idx].CUMULATIVE_FIRST_DOSES_PERCENTAGE.toFixed(2)
+                     let idx = bisect(d[1], xDate)
+                     return d[0] + ": Atleast 1 dose(" +d[1][idx].ATLEAST_ONE_DOSE.toFixed(2) + "%), Fully vaccinated(" + d[1][idx].FULLY_VACCINATED.toFixed(2) + "%)"
                    })
           });
 
@@ -238,7 +244,7 @@ function drawUsVaccinationTrendChart(data) {
                     return usXScale(new Date(d.RECORD_DATE));
                   })
                   .y(function(d) {
-                    return usYScale(+d.CUMULATIVE_FIRST_DOSES_PERCENTAGE);
+                    return usYScale(+d.TOTAL_DOSES_PER_THOUSAND);
                   })
                   (d[1])
         }
@@ -250,7 +256,7 @@ function drawUsVaccinationTrendChart(data) {
                          .attr("y", 0)
                          .style("text-anchor", "middle")
                          .style("font-size", "1.5em")
-                         .text("US Cumulative Vaccination Trend Query");
+                         .text("Vaccination Trend Query (US)");
 
   // Label axes
   // X-axis
@@ -265,9 +271,9 @@ function drawUsVaccinationTrendChart(data) {
                          .attr("transform", "rotate(-90)")
                          .attr("x", -height / 2)
                          .attr("y", -margin.left / 4)
-                         .attr("dy", "-1.1em")
+                         .attr("dy", "-1.5em")
                          .style("text-anchor", "middle")
-                         .text("Cumulative Vaccination Count");
+                         .text("Total doses administered per thousand");
 }
 
 // Default
@@ -379,7 +385,7 @@ let worldTooltip = d3.select("#world-vaccination-trend")
                     .attr("id", "world-tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "10px")
                     .style("display", "none")
 
 let worldVert = worldVaccinationTrendSvg.append("g")
@@ -395,7 +401,7 @@ worldVert.append("path")
 function drawWorldVaccinationTrendChart(data) {
   // Group data with respect to state_id
   let groupedData = d3.group(data, function(d) {
-    return d.COUNTRY_ID;
+    return d.COUNTRY_NAME;
   });
 
   // Create X-axis
@@ -408,7 +414,13 @@ function drawWorldVaccinationTrendChart(data) {
                          .call(worldXAxis);
 
   // Create Y-axis
-  worldYScale.domain([0, 100]);
+  worldYScale.domain([
+    d3.min(data, function(d) {
+      return +d.TOTAL_DOSES_PER_MILLION
+    }),
+    d3.max(data, function(d) {
+      return +d.TOTAL_DOSES_PER_MILLION;
+    }) * 1.25])
   worldVaccinationTrendSvg.selectAll(".worldYAxis")
                          .transition()
                          .duration(500)
@@ -423,12 +435,12 @@ function drawWorldVaccinationTrendChart(data) {
           .attr("class", "world-mouse-per-line");
 
   worldMousePerLine.append("circle")
-        .attr("r", 4)
+        .attr("r", 6)
         .style("stroke", function(d) {
           return worldColorScale(d[0]);
         })
         .style("fill", "none")
-        .style("stroke-width", "1px")
+        .style("stroke-width", "2px")
         .style("opacity", "0")
 
   worldVert.append("svg:rect")
@@ -464,21 +476,21 @@ function drawWorldVaccinationTrendChart(data) {
                 }).left
                 let idx = bisect(d[1], xDate);
                 let record_date = new Date(d[1][idx].RECORD_DATE)
-                let cumulative_vaccination_percentage = +d[1][idx].CUMULATIVE_VACCINATIONS_PERCENTAGE
+                let total_doses_per_million = +d[1][idx].TOTAL_DOSES_PER_MILLION
                 d3.select(".world-mouse-line")
                     .attr("d", function () {
                       let data = "M" + worldXScale(record_date) + "," + (height);
                       data += " " + worldXScale(record_date) + "," + 0;
                       return data;
                     });
-                return "translate(" + worldXScale(record_date) + "," + worldYScale(cumulative_vaccination_percentage) + ")";
+                return "translate(" + worldXScale(record_date) + "," + worldYScale(total_doses_per_million) + ")";
               });
     
     worldTooltip.html(`${xDate.toDateString()}`)
            .style('display', 'block')
            .style('left', `${e.pageX + 20}px`)
            .style('top', `${e.pageY - 20}px`)
-           .style('font-size', "10px")
+           .style('font-size', "1em")
            .selectAll()
            .data(groupedData)
            .join('div')
@@ -491,7 +503,7 @@ function drawWorldVaccinationTrendChart(data) {
               return new Date(d.RECORD_DATE);
             }).left
              let idx = bisect(d[1], xDate)
-             return d[0] + ": " +d[1][idx].CUMULATIVE_VACCINATIONS_PERCENTAGE.toFixed(2)
+             return d[0] + ": " +d[1][idx].TOTAL_DOSES_PER_MILLION.toFixed(2)
            })
   });
 
@@ -515,7 +527,7 @@ function drawWorldVaccinationTrendChart(data) {
                     return worldXScale(new Date(d.RECORD_DATE));
                   })
                   .y(function(d) {
-                    return worldYScale(+d.CUMULATIVE_VACCINATIONS_PERCENTAGE);
+                    return worldYScale(+d.TOTAL_DOSES_PER_MILLION);
                   })
                   (d[1])
         }
@@ -527,7 +539,7 @@ function drawWorldVaccinationTrendChart(data) {
                          .attr("y", 0)
                          .style("text-anchor", "middle")
                          .style("font-size", "1.5em")
-                         .text("World Vaccination Trend Query");
+                         .text("Vaccination Trend Query (World)");
 
   // Label axes
   // X-axis
@@ -544,7 +556,7 @@ function drawWorldVaccinationTrendChart(data) {
                          .attr("y", -margin.left / 4)
                          .attr("dy", "-1.1em")
                          .style("text-anchor", "middle")
-                         .text("Cumulative Vaccinations Percentage");
+                         .text("Total doses administered per million");
 }
 
 // Default

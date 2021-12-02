@@ -39,6 +39,7 @@ async function communityTransmission (req, res) {
     SELECT
         record_date,
         state_id,
+        state_name,
         COUNT(county_id) AS num_of_high_risk_counties
     FROM
     (
@@ -46,6 +47,7 @@ async function communityTransmission (req, res) {
             rs.record_date,
             rs.county_id,
             c.state_id,
+            s.name AS state_name,
             ROUND(((rs.sum_daily_positive_cases * c.population) / 100000), 2) AS transmission_risk
         FROM
         (
@@ -64,11 +66,13 @@ async function communityTransmission (req, res) {
         ) rs
         INNER JOIN "N.SAOJI".County c
         ON rs.county_id = c.id
+        INNER JOIN "N.SAOJI".State s
+        on c.state_id = s.id
     )
     WHERE
         transmission_risk >= 100 AND
         (record_date BETWEEN '${fromDate}' AND \'${toDate}')
-    GROUP BY record_date, state_id
+    GROUP BY record_date, state_id, state_name
     ORDER BY record_date   
     `
     // Creat db connection
@@ -88,7 +92,7 @@ async function communityTransmission (req, res) {
 };
 
 router.post('/community-transmission-trend', function (req, res) {
-  console.log("[INFO] POST /api/community-transmisson/community-transmisson-trend route...");
+  console.log("[INFO] POST /api/community-transmission/community-transmisson-trend route...");
   communityTransmission(req, res);
 })
 
