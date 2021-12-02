@@ -137,12 +137,12 @@ function drawHospitalizationTrendChart(data) {
                            .attr("class", "mouse-per-line");
 
 mousePerLine.append("circle")
-              .attr("r", 4)
+              .attr("r", 6)
               .style("stroke", function(d) {
                 return colorScale(d[0]);
               })
               .style("fill", "none")
-              .style("stroke-width", "1px")
+              .style("stroke-width", "2px")
               .style("opacity", "0")
 
 vert.append("svg:rect")

@@ -24,7 +24,7 @@ const margin = {
   top: 50,
   right: 25,
   bottom: 50,
-  left: 150
+  left: 50
 };
 const width = 800 - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
@@ -92,7 +92,8 @@ usVaccinationTrendSvg.append("g")
 // Initialize Y-axis
 const usYScale = d3.scaleLinear()
                    .range([height, 0]);
-const usYAxis = d3.axisLeft(usYScale);
+const usYAxis = d3.axisLeft(usYScale)
+                  .tickFormat(d3.format("~s"));
 usVaccinationTrendSvg.append("g")
                        .attr("class", "usYAxis");
 
@@ -375,7 +376,8 @@ worldVaccinationTrendSvg.append("g")
 // Initialize Y-axis
 const worldYScale = d3.scaleLinear()
                    .range([height, 0]);
-const worldYAxis = d3.axisLeft(worldYScale);
+const worldYAxis = d3.axisLeft(worldYScale)
+                     .tickFormat(d3.format("~s"));
 worldVaccinationTrendSvg.append("g")
                        .attr("class", "worldYAxis");
 
@@ -558,7 +560,7 @@ function drawWorldVaccinationTrendChart(data) {
                          .attr("transform", "rotate(-90)")
                          .attr("x", -height / 2)
                          .attr("y", -margin.left / 4)
-                         .attr("dy", "-1.1em")
+                         .attr("dy", "-1.5em")
                          .style("text-anchor", "middle")
                          .text("Total doses administered per million");
 }

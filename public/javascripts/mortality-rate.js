@@ -261,7 +261,7 @@ function drawUsMortalityRateTrendChart(data) {
                          .attr("y", 0)
                          .style("text-anchor", "middle")
                          .style("font-size", "1.5em")
-                         .text("US Mortality Trend Query");
+                         .text("Mortality Rate Trend Query (US)");
 
   // Label axes
   // X-axis
@@ -278,7 +278,7 @@ function drawUsMortalityRateTrendChart(data) {
                          .attr("y", -margin.left / 4)
                          .attr("dy", "-1.1em")
                          .style("text-anchor", "middle")
-                         .text("Death Rate");
+                         .text("Mortality Rate");
 }
 
 // Default
@@ -558,7 +558,7 @@ worldTooltip.html(`${xDate.toDateString()}`)
                               .attr("y", 0)
                               .style("text-anchor", "middle")
                               .style("font-size", "1.5em")
-                              .text("World Mortality Rate Trend Query");
+                              .text("Mortality Rate Trend Query (World)");
 
   // Label axes
   // X-axis
@@ -575,7 +575,7 @@ worldTooltip.html(`${xDate.toDateString()}`)
                               .attr("y", -margin.left / 4)
                               .attr("dy", "-1.1em")
                               .style("text-anchor", "middle")
-                              .text("Death Rate");
+                              .text("Mortality Rate");
 }
 
 // Default
