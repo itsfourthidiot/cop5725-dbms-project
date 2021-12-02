@@ -3,11 +3,15 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 $("#toggleus").click(function(){
+  $(this).addClass("active");
+  $("#toggleworld").removeClass("active");
   $("#world-vaccination").hide();
   $("#us-vaccination").show();
 });
 
 $("#toggleworld").click(function(){
+  $(this).addClass("active");
+  $("#toggleus").removeClass("active");
   $("#us-vaccination").hide();
   $("#world-vaccination").show();
 });

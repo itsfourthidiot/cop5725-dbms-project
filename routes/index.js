@@ -25,8 +25,8 @@ router.get('/hospitalization', function(req, res, next) {
   res.render('hospitalization', { title: 'Hospitalization Page' });
 });
 
-router.get('/positivity-world', function(req, res, next) {
-  res.render('positivity-world', { title: 'Positivity rate Page' });
+router.get('/positivity-rate', function(req, res, next) {
+  res.render('positivity-world', { title: 'Positivity Rate Page' });
 });
 
 module.exports = router;

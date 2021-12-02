@@ -1,64 +1,70 @@
 <%- include("partials/head") %>
 <%- include("partials/navbar") %>
-  <header class="text-center">
-    <h1>Group 09</h1>
-    <h2>COVID-19 impact on US and trend comparison with the world.</h2>
-  </header>
   <div class="container">
-    <div class="row">
-      <div class="col-sm">
+    <!-- Group number and project title -->
+    <div class="jumbotron text-center my-5">
+      <h1 class="display-4">Group 09</h1>
+      <p class="lead">COVID-19 impact trends across the US and comparison with rest of the world</p>
+    </div>
+    <div class="row justify-content-md-center mt-4">
+      <div class="col-4">
         <div class="card">
+          <img class="card-img-top" src="/images/positivity-rate.jpg" alt="Card image cap">
           <div class="card-body">
             <h5 class="card-title">Positivity Rate</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="/positivity-world" class="btn btn-primary">Go somewhere</a>
+            <a href="/positivity-rate" class="btn btn-outline-dark">Click Here</a>
           </div>
         </div>
       </div>
-      <div class="col-sm">
+      <div class="col-4">
         <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Death Rate</h5>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="mortality-rate" class="btn btn-primary">Go somewhere</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm">
-        <div class="card">
+          <img class="card-img-top" src="/images/community-transmission.jpg" alt="Card image cap">
           <div class="card-body">
             <h5 class="card-title">Community Transmission</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="/community-transmission" class="btn btn-primary">Go somewhere</a>
+            <a href="/community-transmission" class="btn btn-outline-dark">Click Here</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card">
+          <img class="card-img-top" src="/images/death-rate.jpg" alt="Card image cap">
+          <div class="card-body">
+            <h5 class="card-title">Mortality Rate</h5>
+            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <a href="mortality-rate" class="btn btn-outline-dark">Click Here</a>
           </div>
         </div>
       </div>
     </div>
     <!-- 2nd row -->
-    <div class="row justify-content-md-center">
-      <div class="col-sm-4">
+    <div class="row justify-content-md-center mt-4">
+      <div class="col-4">
         <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Vaccination</h5>
-            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="/vaccination" class="btn btn-primary">Go somewhere</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card">
+          <img class="card-img-top" src="/images/hospitalization.jpg" alt="Card image cap">
           <div class="card-body">
             <h5 class="card-title">Hospitalization</h5>
             <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="/hospitalization" class="btn btn-primary">Go somewhere</a>
+            <a href="/hospitalization" class="btn btn-outline-dark">Click Here</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="card">
+          <img class="card-img-top" src="/images/vaccination.jpg" alt="Card image cap">
+          <div class="card-body">
+            <h5 class="card-title">Vaccination</h5>
+            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <a href="/vaccination" class="btn btn-outline-dark">Click Here</a>
           </div>
         </div>
       </div>
     </div>
     <!-- 3rd row  -->
-    <div class="row justify-content-md-center">
-      <div class="col-3">
-        <button id="num-rows" type="button" class="btn btn-primary btn-lg ">Number of Rows</button>
+    <div class="row my-5">
+      <div class="text-center"> 
+        <button id="num-rows" type="button" class="btn btn-outline-dark">Number of Rows</button>
       </div>
     </div>
   </div>

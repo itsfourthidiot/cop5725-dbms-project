@@ -2,18 +2,18 @@
 <%- include("partials/navbar") %>
 <div class="container">
   <!-- Option to choose between US and world -->
-  <div id="world-positivity">
+  <div id="world-positivity" class="mt-4">
     <form>
       <div class="row">
         <!-- State dropdown -->
-        <div class="col-md-4">
-          <label class="form-label" for="world-countries">Select country(s)</label>
+        <div class="col-4">
+          <label class="form-label" for="world-countries">Select country(ies)</label>
           <select id="world-countries" class="form-control selectpicker" multiple>
             <!-- Fill the options using values stored in db -->
           </select>
         </div>
         <!-- From date -->
-        <div class="col-md-4">
+        <div class="col-4">
           <label class="form-label" for="from-date">From date</label>
           <div class="input-group date" data-provide="datepicker" data-date-format="dd-M-yyyy">
             <input class="form-control" id="from-date" name="from-date" placeholder="dd-M-yyyy" value="01-Jan-2020" type="text"/>  
@@ -23,7 +23,7 @@
           </div>
         </div>
         <!-- To date -->
-        <div class="col-md-4">
+        <div class="col-4">
           <label class="form-label" for="to-date">To date</label>
           <div class="input-group date" data-provide="datepicker" data-date-format="dd-M-yyyy">
             <input class="form-control" id="to-date" name="to-date" placeholder="dd-M-yyyy" value="01-Jan-2022" type="text"/>  
@@ -34,13 +34,16 @@
         </div>
       </div>
       <!-- Submit button -->
-      <div class="row justify-content-md-center">
-        <div class="col-md-3">
-          <button class="btn btn-primary" name="submit" type="submit">Submit</button>
+      <div class="row mt-4">
+        <div class="text-center">
+          <button class="btn btn-outline-dark" name="submit" type="submit">Submit</button>
         </div>
       </div>
     </form>
-    <div id="world-positivity-trend"></div>
+    <div class="mt-4">
+      <div id="world-positivity-trend" class="text-center">
+      </div>
+    </div>
   </div>
 </div>
 <!-- JavaScript -->

@@ -3,11 +3,15 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 $("#toggleus").click(function(){
+  $(this).addClass("active");
+  $("#toggleworld").removeClass("active");
   $("#world-mortality-rate").hide();
   $("#us-mortality-rate").show();
 });
 
 $("#toggleworld").click(function(){
+  $(this).addClass("active");
+  $("#toggleus").removeClass("active");
   $("#us-mortality-rate").hide();
   $("#world-mortality-rate").show();
 });

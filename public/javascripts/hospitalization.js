@@ -36,10 +36,7 @@ fetch(usStatesApi)
 .catch(displayErrors);
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////// Query 2:  US hospitalization trend
+/////////////////////////////////////////////////////// US hospitalization trend
 ////////////////////////////////////////////////////////////////////////////////
 
 // US hospitalization trend API
@@ -53,8 +50,8 @@ const margin = {
   bottom: 50,
   left: 50
 };
-const width = 600 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 800 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 const hospitalizationTrendSvg = d3.select("#hospitalization-trend")
@@ -89,7 +86,7 @@ let tooltip = d3.select("#hospitalization-trend")
                     .attr("id", "tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "10px")
                     .style("display", "none")
 
 let vert = hospitalizationTrendSvg.append("g")
@@ -105,7 +102,7 @@ vert.append("path")
 function drawHospitalizationTrendChart(data) {
   // Group data with respect to state_id
   var groupedData = d3.group(data, function(d) {
-    return d.STATE_ID;
+    return d.STATE_NAME;
   });
 
   // Create X-axis
@@ -118,9 +115,14 @@ function drawHospitalizationTrendChart(data) {
                          .call(xAxis);
 
   // Create Y-axis
-  yScale.domain(d3.extent(data, function(d) {
-    return +d.COVID_ICU_BED_OCCUPANCY;
-  }));
+  yScale.domain([
+    d3.min(data, function(d) {
+      return +d.PERCENTAGE_OF_COVID_BED_COVERAGE_VS_ICU_BED
+    }),
+    d3.max(data, function(d) {
+      return +d.PERCENTAGE_OF_COVID_BED_COVERAGE_VS_ICU_BED;
+    }) * 1.25])
+
   hospitalizationTrendSvg.selectAll(".yAxis")
                          .transition()
                          .duration(500)
@@ -176,21 +178,21 @@ return new Date(d.RECORD_DATE);
 }).left
 let idx = bisect(d[1], xDate);
 let record_date = new Date(d[1][idx].RECORD_DATE)
-let covid_icu_bed_occupancy = +d[1][idx].COVID_ICU_BED_OCCUPANCY
+let percentage_of_covid_bed_coverage_vs_icu_bed = +d[1][idx].PERCENTAGE_OF_COVID_BED_COVERAGE_VS_ICU_BED
 d3.select(".mouse-line")
 .attr("d", function () {
 let data = "M" + xScale(record_date) + "," + (height);
 data += " " + xScale(record_date) + "," + 0;
 return data;
 });
-return "translate(" + xScale(record_date) + "," + yScale(covid_icu_bed_occupancy) + ")";
+return "translate(" + xScale(record_date) + "," + yScale(percentage_of_covid_bed_coverage_vs_icu_bed) + ")";
 });
 
 tooltip.html(`${xDate.toDateString()}`)
 .style('display', 'block')
 .style('left', `${e.pageX + 20}px`)
 .style('top', `${e.pageY - 20}px`)
-.style('font-size', "10px")
+.style('font-size', "1em")
 .selectAll()
 .data(groupedData)
 .join('div')
@@ -203,14 +205,9 @@ let bisect = d3.bisector(function (d) {
 return new Date(d.RECORD_DATE);
 }).left
 var idx = bisect(d[1], xDate)
-return d[0] + ": " +d[1][idx].COVID_ICU_BED_OCCUPANCY.toFixed(2)
+return d[0] + ": " +d[1][idx].PERCENTAGE_OF_COVID_BED_COVERAGE_VS_ICU_BED.toFixed(2)
 })
 });
-
-
-
-
-
 
   // Draw lines
   hospitalizationTrendSvg.selectAll(".line")
@@ -232,7 +229,7 @@ return d[0] + ": " +d[1][idx].COVID_ICU_BED_OCCUPANCY.toFixed(2)
                     return xScale(new Date(d.RECORD_DATE));
                   })
                   .y(function(d) {
-                    return yScale(+d.COVID_ICU_BED_OCCUPANCY);
+                    return yScale(+d.PERCENTAGE_OF_COVID_BED_COVERAGE_VS_ICU_BED);
                   })
                   (d[1])
         }
@@ -244,7 +241,7 @@ return d[0] + ": " +d[1][idx].COVID_ICU_BED_OCCUPANCY.toFixed(2)
                          .attr("y", 0)
                          .style("text-anchor", "middle")
                          .style("font-size", "1.5em")
-                         .text(" Hospitalization Trend Query");
+                         .text("Hospitalization Trend Query (US)");
 
   // Label axes
   // X-axis
@@ -261,7 +258,7 @@ return d[0] + ": " +d[1][idx].COVID_ICU_BED_OCCUPANCY.toFixed(2)
                          .attr("y", -margin.left / 4)
                          .attr("dy", "-1.1em")
                          .style("text-anchor", "middle")
-                         .text("COVID_ICU_BED_OCCUPANCY");
+                         .text("Covid ICU Bed Occupancy");
 }
 
 // Default

@@ -2,10 +2,14 @@
 <%- include("partials/navbar") %>
 <div class="container">
   <!-- Option to choose between US and world -->
-  <button type="button" id="toggleus" class="btn btn-primary">United States</button>
-  <button type="button" id="toggleworld" class="btn btn-primary">World</button>
+  <div class="row mt-4">
+    <div class="text-center">
+      <button type="button" id="toggleus" class="btn btn-outline-dark active">United States</button>
+      <button type="button" id="toggleworld" class="btn btn-outline-dark">World</button>
+    </div>
+  </div>
 
-  <div id="us-vaccination">
+  <div id="us-vaccination" class="mt-4">
     <form>
       <div class="row">
         <!-- State dropdown -->
@@ -37,17 +41,19 @@
         </div>
       </div>
       <!-- Submit button -->
-      <div class="row justify-content-md-center">
-        <div class="col-md-3">
-          <button class="btn btn-primary" name="submit" type="submit">Submit</button>
+      <div class="row mt-4">
+        <div class="text-center">
+          <button class="btn btn-outline-dark" name="submit" type="submit">Submit</button>
         </div>
       </div>
     </form>
-    <div id="us-vaccination-trend"></div>
+    <div class="mt-4">
+      <div id="us-vaccination-trend" class="text-center"></div>
+    </div>
   </div>
 
   <!-- vaccination-world -->
-  <div id="world-vaccination" style="display:none">
+  <div id="world-vaccination" class="mt-4" style="display:none">
     <form>
       <div class="row">
         <!-- State dropdown -->
@@ -79,13 +85,15 @@
         </div>
       </div>
       <!-- Submit button -->
-      <div class="row justify-content-md-center">
-        <div class="col-md-3">
-          <button class="btn btn-primary" name="submit" type="submit">Submit</button>
+      <div class="row mt-4">
+        <div class="text-center">
+          <button class="btn btn-outline-dark" name="submit" type="submit">Submit</button>
         </div>
       </div>
     </form>
-    <div id="world-vaccination-trend"></div>
+    <div class="mt-4">
+      <div id="world-vaccination-trend" class="text-center"></div>
+    </div>
   </div>
 </div>
 
