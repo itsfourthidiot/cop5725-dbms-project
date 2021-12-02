@@ -22,17 +22,17 @@ async function worldPositivityTrend (req, res) {
     let sql = `
     WITH Filtered(record_date, daily_tests, daily_positive_cases, country_id) AS
     (
-        SELECT
-            ccd.RECORD_DATE AS record_date,
-            ccd.DAILY_TESTS AS daily_tests,
-            ccd.DAILY_POSITIVE_CASES AS daily_positive_cases,
-            ccd.COUNTRY_ID AS country_id
-        FROM "N.SAOJI".COUNTRY_COVID_DATA ccd
-        WHERE
-            (ccd.DAILY_TESTS IS NOT NULL) AND
-            (ccd.DAILY_POSITIVE_CASES IS NOT NULL) AND
-            (ccd.DAILY_TESTS > ccd.DAILY_POSITIVE_CASES) AND
-            (ccd.COUNTRY_ID IN (${id}))
+      SELECT
+          ccd.RECORD_DATE AS record_date,
+          ccd.DAILY_TESTS AS daily_tests,
+          ccd.DAILY_POSITIVE_CASES AS daily_positive_cases,
+          ccd.COUNTRY_ID AS country_id
+      FROM "N.SAOJI".COUNTRY_COVID_DATA ccd
+      WHERE
+          (ccd.DAILY_TESTS IS NOT NULL) AND
+          (ccd.DAILY_POSITIVE_CASES IS NOT NULL) AND
+          (ccd.DAILY_TESTS > ccd.DAILY_POSITIVE_CASES) AND
+          (ccd.COUNTRY_ID IN (${id}))
     )
     SELECT
       f.record_date,
@@ -40,12 +40,13 @@ async function worldPositivityTrend (req, res) {
       f.daily_positive_cases,
       ROUND(((f.daily_positive_cases / f.daily_tests) * 100), 2) AS positivity_rate,
       c.id AS country_id,
-      c.name
+      c.name AS country_name
     FROM Filtered f
     INNER JOIN "N.SAOJI".COUNTRY c 
     ON f.country_id = c.id
     WHERE (record_date BETWEEN \'${fromDate}' AND \'${toDate}')
-    ORDER BY record_date`
+    ORDER BY record_date
+    `
     // Creat db connection
     connection = await oracledb.getConnection(config);
     result = await connection.execute(sql, [], {outFormat: oracledb.OUT_FORMAT_OBJECT});
@@ -105,8 +106,5 @@ router.post('/world-positivity-summary', function (req, res) {
   console.log("[INFO] POST /api/positivity-world/world-positivity-summary route...");
   worldPositivitySummary(req, res);
 })
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 module.exports = router;

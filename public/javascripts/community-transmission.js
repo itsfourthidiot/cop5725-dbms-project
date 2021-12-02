@@ -50,8 +50,8 @@ const margin = {
   bottom: 50,
   left: 50
 };
-const width = 600 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 800 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 const CommunityTransmissionTrendSvg = d3.select("#community-transmission-trend")
@@ -86,7 +86,7 @@ let tooltip = d3.select("#community-transmission-trend")
                     .attr("id", "tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "10px")
                     .style("display", "none")
 
 let vert = CommunityTransmissionTrendSvg.append("g")
@@ -102,7 +102,7 @@ vert.append("path")
 function drawCommunityTransmissionTrendChart(data) {
   // Group data with respect to state_id
   var groupedData = d3.group(data, function(d) {
-    return d.STATE_ID;
+    return d.STATE_NAME;
   });
   // Create X-axis
   xScale.domain(d3.extent(data, function(d) {
@@ -114,7 +114,13 @@ function drawCommunityTransmissionTrendChart(data) {
                          .call(xAxis);
 
   // Create Y-axis
-  yScale.domain([0, 100]);
+  yScale.domain([
+    d3.min(data, function(d) {
+      return +d.NUM_OF_HIGH_RISK_COUNTIES
+    }),
+    d3.max(data, function(d) {
+      return +d.NUM_OF_HIGH_RISK_COUNTIES;
+    }) * 1.25])
   CommunityTransmissionTrendSvg.selectAll(".yAxis")
                          .transition()
                          .duration(500)
@@ -129,12 +135,12 @@ function drawCommunityTransmissionTrendChart(data) {
                               .attr("class", "mouse-per-line");
 
   mousePerLine.append("circle")
-                .attr("r", 4)
+                .attr("r", 6)
                 .style("stroke", function(d) {
                   return colorScale(d[0]);
                 })
                 .style("fill", "none")
-                .style("stroke-width", "1px")
+                .style("stroke-width", "2px")
                 .style("opacity", "0")
 
   vert.append("svg:rect")
@@ -184,7 +190,7 @@ function drawCommunityTransmissionTrendChart(data) {
                   .style('display', 'block')
                   .style('left', `${e.pageX + 20}px`)
                   .style('top', `${e.pageY - 20}px`)
-                  .style('font-size', "10px")
+                  .style('font-size', "1em")
                   .selectAll()
                   .data(groupedData)
                   .join('div')
@@ -233,7 +239,7 @@ function drawCommunityTransmissionTrendChart(data) {
                          .attr("y", 0)
                          .style("text-anchor", "middle")
                          .style("font-size", "1.5em")
-                         .text("US Community Trend Query");
+                         .text("Community Trend Query (US)");
 
   // Label axes
   // X-axis
@@ -248,9 +254,9 @@ function drawCommunityTransmissionTrendChart(data) {
                          .attr("transform", "rotate(-90)")
                          .attr("x", -height / 2)
                          .attr("y", -margin.left / 4)
-                         .attr("dy", "-1.1em")
+                         .attr("dy", "-1.5em")
                          .style("text-anchor", "middle")
-                         .text("Cumulative First Dose Percentage");
+                         .text("Number of high risk counties");
 }
 
 // Default
