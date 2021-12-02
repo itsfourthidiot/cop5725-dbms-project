@@ -22,8 +22,8 @@ const margin = {
   bottom: 50,
   left: 50
 };
-const width = 600 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 800 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 function displayErrors(err){
   console.log("INSIDE displayErrors!");
@@ -104,7 +104,7 @@ let usTooltip = d3.select("#us-mortality-rate-trend")
                     .attr("id", "us-tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "10px")
                     .style("display", "none")
 
 let usVert = usMortalityRateTrendSvg.append("g")
@@ -120,7 +120,7 @@ usVert.append("path")
 function drawUsMortalityRateTrendChart(data) {
   // Group data with respect to state_id
   var groupedData = d3.group(data, function(d) {
-    return d.STATE_ID;
+    return d.STATE_NAME;
   });
   // Create X-axis
   usXScale.domain(d3.extent(data, function(d) {
@@ -132,9 +132,13 @@ function drawUsMortalityRateTrendChart(data) {
                          .call(usXAxis);
 
   // Create Y-axis
-  usYScale.domain(d3.extent(data, function(d) {
-    return +d.DEATH_RATE;
-  }));
+  usYScale.domain([
+    d3.min(data, function(d) {
+      return +d.DEATH_RATE
+    }),
+    d3.max(data, function(d) {
+      return +d.DEATH_RATE;
+    }) * 1.25])
   usMortalityRateTrendSvg.selectAll(".usYAxis")
                          .transition()
                          .duration(500)
@@ -149,12 +153,12 @@ function drawUsMortalityRateTrendChart(data) {
                              .attr("class", "us-mouse-per-line");
 
   usMousePerLine.append("circle")
-                .attr("r", 4)
+                .attr("r", 6)
                 .style("stroke", function(d) {
                   return usColorScale(d[0]);
                 })
                 .style("fill", "none")
-                .style("stroke-width", "1px")
+                .style("stroke-width", "2px")
                 .style("opacity", "0")
 
   usVert.append("svg:rect")
@@ -204,7 +208,7 @@ function drawUsMortalityRateTrendChart(data) {
                    .style('display', 'block')
                    .style('left', `${e.pageX + 20}px`)
                    .style('top', `${e.pageY - 20}px`)
-                   .style('font-size', "10px")
+                   .style('font-size', "1em")
                    .selectAll()
                    .data(groupedData)
                    .join('div')
@@ -270,7 +274,7 @@ function drawUsMortalityRateTrendChart(data) {
                          .attr("y", -margin.left / 4)
                          .attr("dy", "-1.1em")
                          .style("text-anchor", "middle")
-                         .text("Cumulative First Dose Percentage");
+                         .text("Death Rate");
 }
 
 // Default
@@ -392,7 +396,7 @@ let worldTooltip = d3.select("#world-mortality-rate-trend")
                     .attr("id", "world-tooltip")
                     .style("position", "absolute")
                     .style("background-color", "#D3D3D3")
-                    .style("padding", "6px")
+                    .style("padding", "10px")
                     .style("display", "none")
 
 let worldVert = worldMortalityRateTrendSvg.append("g")
@@ -408,7 +412,7 @@ worldVert.append("path")
 function drawWorldMortalityRateTrendChart(data) {
   // Group data with respect to state_id
   let groupedData = d3.group(data, function(d) {
-    return d.COUNTRY_ID;
+    return d.COUNTRY_NAME;
   });
   console.log(groupedData);
 //   // Create X-axis
@@ -421,9 +425,17 @@ worldXScale.domain(d3.extent(data, function(d) {
                               .call(worldXAxis);
 
 //   // Create Y-axis
-worldYScale.domain(d3.extent(data, function(d) {
-    return new Date(d.DEATH_RATE);
-  }));
+// worldYScale.domain(d3.extent(data, function(d) {
+//     return new Date(d.DEATH_RATE);
+//   }));
+
+worldYScale.domain([
+  d3.min(data, function(d) {
+    return +d.DEATH_RATE
+  }),
+  d3.max(data, function(d) {
+    return +d.DEATH_RATE;
+  }) * 1.25])
   worldMortalityRateTrendSvg.selectAll(".worldYAxis")
                               .transition()
                               .duration(500)
@@ -438,12 +450,12 @@ worldColorScale.domain(groupedData.keys());
     .attr("class", "world-mouse-per-line");
 
 worldMousePerLine.append("circle")
-  .attr("r", 4)
+  .attr("r", 6)
   .style("stroke", function(d) {
     return worldColorScale(d[0]);
   })
   .style("fill", "none")
-  .style("stroke-width", "1px")
+  .style("stroke-width", "2px")
   .style("opacity", "0")
 
 worldVert.append("svg:rect")
@@ -493,7 +505,7 @@ worldTooltip.html(`${xDate.toDateString()}`)
      .style('display', 'block')
      .style('left', `${e.pageX + 20}px`)
      .style('top', `${e.pageY - 20}px`)
-     .style('font-size', "10px")
+     .style('font-size', "1em")
      .selectAll()
      .data(groupedData)
      .join('div')
