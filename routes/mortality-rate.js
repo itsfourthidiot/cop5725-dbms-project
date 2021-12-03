@@ -143,36 +143,36 @@ async function worldMortalityRate (req, res) {
     // Construct SQL statement
     let sql = `
     WITH Filtered(record_date, country_daily_positive_cases, country_daily_deaths, country_id) AS
-(
+    (
+        SELECT
+            record_date,
+            daily_positive_cases AS country_daily_positive_cases,
+            daily_deaths AS country_daily_deaths,
+            country_id
+        FROM "N.SAOJI".Country_covid_data
+        WHERE country_id IN (${id})
+    )
     SELECT
-        record_date,
-        daily_positive_cases AS country_daily_positive_cases,
-        daily_deaths AS country_daily_deaths,
-        country_id
-    FROM "N.SAOJI".Country_covid_data
-    WHERE country_id IN (${id})
-)
-SELECT
-    t1.record_date,
-    CASE
-        WHEN t1.country_cumulative_positive_cases=0 THEN 0
-        ELSE ROUND((t1.country_cumulative_deaths / t1.country_cumulative_positive_cases) * 100, 2)
-    END AS death_rate,
-    c.id AS country_id,
-    c.name AS country_name
-FROM
-(
-    SELECT
-        record_date,
-        NVL(SUM (country_daily_positive_cases) OVER (PARTITION BY country_id ORDER BY record_date), 0) AS country_cumulative_positive_cases,
-        NVL(SUM (country_daily_deaths) OVER (PARTITION BY country_id ORDER BY record_date), 0) AS country_cumulative_deaths,
-        country_id
-    FROM Filtered
-) t1
-INNER JOIN "N.SAOJI".Country c
-ON c.id = t1.country_id
-WHERE record_date BETWEEN \'${fromDate}' AND \'${toDate}'
-ORDER BY country_id, record_date
+        t1.record_date,
+        CASE
+            WHEN t1.country_cumulative_positive_cases=0 THEN 0
+            ELSE ROUND((t1.country_cumulative_deaths / t1.country_cumulative_positive_cases) * 100, 2)
+        END AS death_rate,
+        c.id AS country_id,
+        c.name AS country_name
+    FROM
+    (
+        SELECT
+            record_date,
+            NVL(SUM (country_daily_positive_cases) OVER (PARTITION BY country_id ORDER BY record_date), 0) AS country_cumulative_positive_cases,
+            NVL(SUM (country_daily_deaths) OVER (PARTITION BY country_id ORDER BY record_date), 0) AS country_cumulative_deaths,
+            country_id
+        FROM Filtered
+    ) t1
+    INNER JOIN "N.SAOJI".Country c
+    ON c.id = t1.country_id
+    WHERE record_date BETWEEN \'${fromDate}' AND \'${toDate}'
+    ORDER BY country_id, record_date
     `
     // Creat db connection
     connection = await oracledb.getConnection(config);
