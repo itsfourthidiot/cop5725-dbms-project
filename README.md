@@ -45,6 +45,7 @@ Mortality rate is defined by the ratio of total number of COVID-19 deaths to the
 
 ### Hospitalization
 Hospitalization rate is defined by the ratio of ICU bed occupancy by COVID-19 patients to the total number of ICU beds.
+
 ![Hospitalization](screenshots/hospitalization.png)
 
 ### Vaccinations
