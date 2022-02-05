@@ -34,6 +34,8 @@ For each state, it denotes the total number of counties in high transmission ris
 
 ![Community Transmission](screenshots/community-transmission.png)
 
+https://user-images.githubusercontent.com/89497585/152651589-f9d0b141-4eeb-4729-99b7-b1e17072a6d2.mp4
+
 ### Mortality Rate
 Mortality rate is defined by the ratio of total number of COVID-19 deaths to the total number of positive COVID-19 cases.
 
