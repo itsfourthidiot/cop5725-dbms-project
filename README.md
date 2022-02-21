@@ -1,5 +1,8 @@
 # cop5725-dbms-project
 
+## Topic:
+Trend analysis of COVID-19 impact on United States and its comparison with rest of the world.
+
 ## Team Members (Group 09):
 - Bodke, Gauri Pandharinath
 - Gopinath, Ashwin
